@@ -19,6 +19,7 @@ body{background:var(--n);color:var(--b);font-family:'Barlow',sans-serif;overflow
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(13,92,171,0.25)}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px}.logo span{color:var(--r)}
+.logo img{height:38px;width:auto;display:block}
 .nav-links{display:flex;gap:36px;list-style:none}
 .nav-links a{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gc);text-decoration:none;transition:color .2s}
 .nav-links a:hover{color:var(--rv)}
@@ -169,6 +170,7 @@ section{padding:100px 48px}
 footer{background:var(--n);border-top:1px solid var(--g);padding:32px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
 .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;cursor:pointer;user-select:none}
 .footer-logo span{color:var(--r)}
+.footer-logo img{height:32px;width:auto;display:block}
 .footer-copy{font-size:13px;color:var(--gc)}
 
 /* ADMIN OVERLAY */
@@ -177,6 +179,7 @@ footer{background:var(--n);border-top:1px solid var(--g);padding:32px 48px;displ
 .adm-login-box{background:var(--ns);border:1px solid var(--g);padding:48px 40px;width:340px;text-align:center}
 .adm-logo{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:3px;margin-bottom:4px}
 .adm-logo span{color:var(--r)}
+.adm-logo img{height:48px;width:auto;display:block;margin:0 auto}
 .adm-sub{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gc);margin-bottom:32px}
 .adm-input{width:100%;background:var(--nm);border:1px solid var(--g);color:var(--b);padding:14px 16px;font-family:'Barlow',sans-serif;font-size:15px;outline:none;margin-bottom:12px;display:block;transition:border-color .2s}
 .adm-input:focus{border-color:var(--r)}
@@ -281,6 +284,7 @@ footer{background:var(--n);border-top:1px solid var(--g);padding:32px 48px;displ
   nav{padding:0 16px;height:60px}
   .nav-links{display:none}
   .logo{font-size:22px}
+  .logo img{height:30px}
   .nav-cta{padding:8px 16px;font-size:12px}
   .hero{min-height:100svh}
   .hero-content{padding:0 20px;padding-top:80px;max-width:100%}
@@ -340,7 +344,7 @@ nav{box-shadow:0 1px 3px rgba(15,34,54,0.06)}
 
 <!-- NAV -->
 <nav>
-  <div class="logo">Besso <span>Automotores</span></div>
+  <div class="logo"><img src="logo-besso.png" alt="Besso Automotores"></div>
   <ul class="nav-links">
     <li><a href="#catalogo">Catálogo</a></li>
     <li><a href="#servicios">Servicios</a></li>
@@ -481,7 +485,7 @@ nav{box-shadow:0 1px 3px rgba(15,34,54,0.06)}
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo" id="footerLogo">Besso <span>Automotores</span></div>
+  <div class="footer-logo" id="footerLogo"><img src="logo-besso.png" alt="Besso Automotores"></div>
   <div class="footer-copy">© 2026 Besso Automotores. Todos los derechos reservados.</div>
 </footer>
 
@@ -496,7 +500,7 @@ nav{box-shadow:0 1px 3px rgba(15,34,54,0.06)}
   <!-- LOGIN -->
   <div class="adm-login" id="admLogin">
     <div class="adm-login-box">
-      <div class="adm-logo">Besso <span>Automotores</span></div>
+      <div class="adm-logo"><img src="logo-besso.png" alt="Besso Automotores"></div>
       <div class="adm-sub">Panel de administración</div>
       <input class="adm-input" id="admUser" type="text" placeholder="Usuario" autocomplete="off"/>
       <input class="adm-input" id="admPass" type="password" placeholder="Contraseña"/>
