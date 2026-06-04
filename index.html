@@ -14,8 +14,8 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--r:#1565c0;--rv:#0d47a1;--n:#fbfaf8;--nm:#f0ede8;--ns:#fbfaf8;--g:#d4cfc6;--gc:#7a7068;--b:#0f2236;--mt:#8a9baf;--verde:#16a34a;--amarillo:#d97706}
-html{scroll-behavior:smooth}
-body{background:var(--n);color:var(--b);font-family:'Manrope',system-ui,sans-serif;overflow-x:hidden}
+html{scroll-behavior:smooth;overflow-x:hidden;width:100%;max-width:100%}
+body{background:var(--n);color:var(--b);font-family:'Manrope',system-ui,sans-serif;overflow-x:hidden;width:100%;max-width:100%}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--n)}::-webkit-scrollbar-thumb{background:var(--r);border-radius:2px}
 
 /* NAV */
@@ -397,7 +397,7 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
 }
 
 /* MARQUEE */
-.marquee-track{overflow:hidden;background:var(--b);border-top:1px solid rgba(255,255,255,0.05);padding:13px 0;flex-shrink:0}
+.marquee-track{overflow:hidden;position:relative;width:100%;max-width:100%;background:var(--b);border-top:1px solid rgba(255,255,255,0.05);padding:13px 0}
 .marquee-inner{display:flex;white-space:nowrap;animation:marqueeX 32s linear infinite}
 .marquee-inner span{font-family:'Manrope',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.22);padding:0 32px}
 .marquee-inner span::after{content:'·';margin-left:32px;color:rgba(127,192,255,0.25);font-size:14px}
