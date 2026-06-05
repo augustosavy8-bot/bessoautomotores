@@ -737,6 +737,13 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
           <div class="af"><label>Combustible</label><select id="fCombustible"><option>Nafta</option><option>Diesel</option><option>GNC</option><option>Híbrido</option><option>Eléctrico</option></select></div>
         </div>
         <div class="af-row">
+          <div class="af"><label>Categoría</label><select id="fCategoria"><option value="">— Sin categoría —</option><option value="SUV">SUV</option><option value="Pick Up">Pick Up</option><option value="Toyota">Toyota</option><option value="Multimarcas">Multimarcas</option></select></div>
+          <div class="af" style="display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:4px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;letter-spacing:0;text-transform:none;color:var(--b);margin-bottom:10px"><input type="checkbox" id="fPrimerAuto" style="width:16px;height:16px;cursor:pointer;accent-color:var(--r)"/> Primer auto</label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;letter-spacing:0;text-transform:none;color:var(--b)"><input type="checkbox" id="fSeleccionado" style="width:16px;height:16px;cursor:pointer;accent-color:var(--r)"/> Destacado / Seleccionado</label>
+          </div>
+        </div>
+        <div class="af-row">
           <div class="af"><label>Kilómetros</label><input id="fKm" type="text" placeholder="45.000 km"/></div>
           <div class="af"><label>Transmisión</label><select id="fTransmision"><option>Automático</option><option>Manual</option><option>CVT</option><option>DSG</option></select></div>
         </div>
@@ -798,38 +805,41 @@ var RESENAS_TXT=[
   {nombre:"Ana Silvia Volpato",  estrellas:4, meta:"Local Guide · 55 opiniones",  fecha:"Hace un año",          texto:"Compramos nuestro coche, muy buen asesoramiento y ágiles los trámites. Volveremos."}
 ];
 
-// ── DATOS DEMO (en memoria · sin backend) ──
-const _F=[
- 'https://images.pexels.com/photos/3807517/pexels-photo-3807517.jpeg?auto=compress&cs=tinysrgb&w=1200',
- 'https://images.pexels.com/photos/1638459/pexels-photo-1638459.jpeg?auto=compress&cs=tinysrgb&w=1200',
- 'https://images.pexels.com/photos/164634/pexels-photo-164634.jpeg?auto=compress&cs=tinysrgb&w=1200',
- 'https://images.pexels.com/photos/1231643/pexels-photo-1231643.jpeg?auto=compress&cs=tinysrgb&w=1200'
-];
-let DB={
-  autos:[
-    {id:'d1',marca:'Volkswagen',modelo:'Amarok',version:'2.0 TDI Highline 4x4',anio:'2021',tipo:'usado',combustible:'Diesel',km:'78.000 km',transmision:'Automático',precio:'32.500.000',descripcion:'Caja automática, cuero, control de tracción. Service oficial al día.',fotos:[_F[0],_F[2]],created_at:'2026-06-01T10:00:00Z'},
-    {id:'d2',marca:'Toyota',modelo:'Hilux',version:'2.8 SRV 4x4 AT',anio:'2022',tipo:'usado',combustible:'Diesel',km:'54.000 km',transmision:'Automático',precio:'41.000.000',descripcion:'Impecable, único dueño. Cubiertas nuevas, multimedia con cámara.',fotos:[_F[1],_F[3]],created_at:'2026-06-01T09:00:00Z'},
-    {id:'d3',marca:'Ford',modelo:'Ranger',version:'XLT 3.2 4x4',anio:'2024',tipo:'nuevo',combustible:'Diesel',km:'0 km',transmision:'Automático',precio:'48.900.000',descripcion:'0km. Entrega inmediata. Garantía oficial de fábrica.',fotos:[_F[2],_F[0]],created_at:'2026-06-01T08:00:00Z'},
-    {id:'d4',marca:'Volkswagen',modelo:'Gol Trend',version:'1.6 Comfortline',anio:'2019',tipo:'usado',combustible:'Nafta',km:'95.000 km',transmision:'Manual',precio:'14.200.000',descripcion:'Excelente estado, ideal primer auto. Muy económico.',fotos:[_F[3]],created_at:'2026-06-01T07:00:00Z'},
-    {id:'d5',marca:'Chevrolet',modelo:'Onix',version:'1.0 Turbo LTZ',anio:'2024',tipo:'nuevo',combustible:'Nafta',km:'0 km',transmision:'Automático',precio:'23.800.000',descripcion:'0km, full. Pantalla, sensores y cámara de retroceso.',fotos:[_F[0]],created_at:'2026-06-01T06:00:00Z'},
-    {id:'d6',marca:'Fiat',modelo:'Cronos',version:'1.3 Drive',anio:'2020',tipo:'usado',combustible:'Nafta',km:'62.000 km',transmision:'Manual',precio:'16.900.000',descripcion:'Service al día, papeles en regla. Permuto y financio.',fotos:[_F[1],_F[2]],created_at:'2026-06-01T05:00:00Z'}
-  ],
-  consultas:[]
-};
-async function sbGet(t){
-  return (DB[t]||[]).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
+// ══════════════════════════════════════════
+// SUPABASE — conexión (editar si cambia el proyecto)
+// SB_URL: ref derivado del JWT → hrzttuxgfrmtudvqwjlb
+// ══════════════════════════════════════════
+const SB_URL='https://hrzttuxgfrmtudvqwjlb.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyenR0dXhnZnJtdHVkdnF3amxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2ODYzOTEsImV4cCI6MjA5NjI2MjM5MX0.7Ubo32uNjCs63YS5GRZCF_-1-76xaymzXWJcEI8rTyY';
+const _SBH={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+
+async function sbGet(t,params){
+  const q=params?'?'+params+'&order=created_at.desc':'?order=created_at.desc';
+  const r=await fetch(SB_URL+'/rest/v1/'+t+q,{headers:_SBH});
+  if(!r.ok)throw new Error('sbGet '+t+' '+r.status);
+  return r.json();
 }
 async function sbPost(t,d){
-  d.id='id'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  d.created_at=new Date().toISOString();
-  (DB[t]=DB[t]||[]).unshift(d);
+  const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:_SBH,body:JSON.stringify(d)});
+  if(!r.ok)throw new Error('sbPost '+t+' '+r.status);
   return true;
 }
 async function sbPatch(t,id,d){
-  const x=(DB[t]||[]).find(r=>r.id===id); if(x)Object.assign(x,d); return true;
+  const r=await fetch(SB_URL+'/rest/v1/'+t+'?id=eq.'+id,{method:'PATCH',headers:_SBH,body:JSON.stringify(d)});
+  if(!r.ok)throw new Error('sbPatch '+t+' '+r.status);
+  return true;
 }
 async function sbDelete(t,id){
-  DB[t]=(DB[t]||[]).filter(r=>r.id!==id); return true;
+  const r=await fetch(SB_URL+'/rest/v1/'+t+'?id=eq.'+id,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+  if(!r.ok)throw new Error('sbDelete '+t+' '+r.status);
+  return true;
+}
+async function sbSubirFoto(dataUrl){
+  const blob=await (await fetch(dataUrl)).blob();
+  const nombre=Date.now().toString(36)+Math.random().toString(36).slice(2,8)+'.jpg';
+  const up=await fetch(SB_URL+'/storage/v1/object/autos/'+nombre,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'image/jpeg','Cache-Control':'3600','x-upsert':'true'},body:blob});
+  if(!up.ok)throw new Error('Upload '+up.status);
+  return SB_URL+'/storage/v1/object/public/autos/'+nombre;
 }
 
 // ── VIDEO ──
@@ -923,7 +933,9 @@ async function enviarConsulta(){
   const nombre=document.getElementById('cNombre').value.trim();
   const telefono=document.getElementById('cTelefono').value.trim();
   if(!nombre||!telefono){alert('Completá nombre y teléfono');return;}
-  const ok=await sbPost('consultas',{nombre,telefono,consulta_sobre:document.getElementById('cSobre').value,mensaje:document.getElementById('cMensaje').value.trim(),leida:false});
+  const _sobre=document.getElementById('cSobre').value;
+  const _texto=document.getElementById('cMensaje').value.trim();
+  const ok=await sbPost('consultas',{nombre,telefono,mensaje:(_sobre?_sobre+': ':'')+_texto,leida:false});
   if(ok){document.getElementById('formContacto').style.display='none';document.getElementById('formOk').style.display='block';}
   else{alert('Error al enviar. Intentá por WhatsApp.');}
 }
@@ -1042,22 +1054,25 @@ fz.addEventListener('dragleave',()=>fz.style.borderColor='');
 fz.addEventListener('drop',e=>{e.preventDefault();fz.style.borderColor='';admAgregarFotos(e.dataTransfer.files);});
 
 async function admAgregarFotos(files){
-  const arr=[...files].slice(0, 6 - admFotos.length);
+  const arr=[...files].slice(0,6-admFotos.length);
   if(!arr.length){toast('Máximo 6 fotos','r');return;}
   const btnG=document.getElementById('btnGuardar');
-  btnG.disabled=true;btnG.textContent='Procesando fotos…';
+  btnG.disabled=true;btnG.textContent='Subiendo fotos…';
   try{
     const resultados=await Promise.all(arr.map(file=>new Promise(resolve=>{
       const reader=new FileReader();
       reader.onload=e=>{
         const img=new Image();
-        img.onload=()=>{
-          const canvas=document.createElement('canvas');
-          const MAX=1200; let w=img.width,h=img.height;
-          if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
-          canvas.width=w;canvas.height=h;
-          canvas.getContext('2d').drawImage(img,0,0,w,h);
-          resolve(canvas.toDataURL('image/jpeg',0.8));
+        img.onload=async ()=>{
+          try{
+            const canvas=document.createElement('canvas');
+            const MAX=1200;let w=img.width,h=img.height;
+            if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+            canvas.width=w;canvas.height=h;
+            canvas.getContext('2d').drawImage(img,0,0,w,h);
+            const url=await sbSubirFoto(canvas.toDataURL('image/jpeg',0.8));
+            resolve(url);
+          }catch(err){toast('Error al subir foto: '+err.message,'r');resolve(null);}
         };
         img.onerror=()=>resolve(null);
         img.src=e.target.result;
@@ -1065,9 +1080,10 @@ async function admAgregarFotos(files){
       reader.onerror=()=>resolve(null);
       reader.readAsDataURL(file);
     })));
-    admFotos=[...admFotos,...resultados.filter(Boolean)];
+    const urls=resultados.filter(Boolean);
+    if(urls.length)admFotos=[...admFotos,...urls];
     admRenderFotos();
-  }catch(e){toast('Error al procesar fotos','r');}
+  }catch(e){toast('Error al subir fotos','r');}
   btnG.disabled=false;btnG.textContent=document.getElementById('fEditId').value?'Actualizar auto':'Guardar auto';
 }
 function admQuitarFoto(i){admFotos.splice(i,1);admRenderFotos();}
@@ -1094,7 +1110,7 @@ async function admGuardar(){
   if(!admFotos.length){toast('Agregá al menos una foto','r');return;}
   const btn=document.getElementById('btnGuardar');
   btn.disabled=true;btn.textContent='Guardando…';
-  const payload={marca,modelo,version:document.getElementById('fVersion').value.trim(),anio,tipo:document.getElementById('fTipo').value,combustible:document.getElementById('fCombustible').value,km:document.getElementById('fKm').value.trim(),transmision:document.getElementById('fTransmision').value,precio,descripcion:document.getElementById('fDesc').value.trim(),fotos:admFotos};
+  const payload={marca,modelo,version:document.getElementById('fVersion').value.trim(),anio,tipo:document.getElementById('fTipo').value,combustible:document.getElementById('fCombustible').value,km:document.getElementById('fKm').value.trim(),transmision:document.getElementById('fTransmision').value,precio,descripcion:document.getElementById('fDesc').value.trim(),categoria:document.getElementById('fCategoria').value||null,primer_auto:document.getElementById('fPrimerAuto').checked,seleccionado:document.getElementById('fSeleccionado').checked,fotos:admFotos};
   try{
     const editId=document.getElementById('fEditId').value;
     if(editId){await sbPatch('autos',editId,payload);toast('Auto actualizado','v');}
@@ -1110,6 +1126,9 @@ function admLimpiar(){
   document.getElementById('fTipo').value='usado';
   document.getElementById('fCombustible').value='Nafta';
   document.getElementById('fTransmision').value='Automático';
+  document.getElementById('fCategoria').value='';
+  document.getElementById('fPrimerAuto').checked=false;
+  document.getElementById('fSeleccionado').checked=false;
   admFotos=[];admRenderFotos();
   document.getElementById('formTit').innerHTML='Nuevo auto <span>+</span>';
   document.getElementById('btnGuardar').textContent='Guardar auto';
@@ -1155,6 +1174,9 @@ function admEditar(id){
   document.getElementById('fTransmision').value=a.transmision;
   document.getElementById('fPrecio').value=a.precio;
   document.getElementById('fDesc').value=a.descripcion||'';
+  document.getElementById('fCategoria').value=a.categoria||'';
+  document.getElementById('fPrimerAuto').checked=!!a.primer_auto;
+  document.getElementById('fSeleccionado').checked=!!a.seleccionado;
   document.getElementById('fEditId').value=a.id;
   admFotos=(a.fotos||[]);admRenderFotos();
   document.getElementById('formTit').innerHTML='Editar auto <span>✎</span>';
@@ -1197,7 +1219,6 @@ function admRenderConsultas(){
         <div>
           <div class="cons-nombre">${c.nombre}</div>
           <div class="cons-tel">Tel: <strong>${c.telefono||'—'}</strong></div>
-          ${c.consulta_sobre?`<div class="cons-sobre">${c.consulta_sobre}</div>`:''}
         </div>
         <span class="${c.leida?'badge-leida':'badge-nueva'}">${c.leida?'Leída':'Nueva'}</span>
       </div>
