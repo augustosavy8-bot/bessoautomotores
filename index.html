@@ -397,7 +397,8 @@ footer{background:#0f2236;border-top:1px solid rgba(255,255,255,0.08);padding:32
   .serv-content{padding:20px 16px}
 
   /* RESEÑAS */
-  .res-cards{grid-template-columns:1fr}
+  .res-card{flex:0 0 100%;min-width:0}
+  .res-arrow{display:none}
   .res-rating-block{gap:16px;margin-bottom:36px}
   .res-num-big{font-size:clamp(52px,14vw,80px)}
   .res-ver-btn{width:100%;justify-content:center;min-height:48px;box-sizing:border-box}
@@ -501,7 +502,17 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
 .res-stars-lg{display:flex;gap:4px;font-size:26px;line-height:1;margin-bottom:8px}
 .res-count{font-family:'Manrope',sans-serif;font-size:13px;color:var(--gc);letter-spacing:0.03em;margin-bottom:12px}
 .res-google-badge{display:inline-flex;align-items:center;gap:7px;font-family:'Manrope',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gc);background:var(--nm);border:1px solid var(--g);padding:6px 14px;border-radius:100px}
-.res-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:48px}
+.res-carousel{position:relative;width:100%;margin-bottom:48px}
+.res-cards{position:relative;display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;padding-bottom:4px}
+.res-cards::-webkit-scrollbar{display:none}
+.res-card{flex:0 0 calc(50% - 10px);scroll-snap-align:start}
+.res-arrow{position:absolute;top:calc(50% - 20px);width:40px;height:40px;border-radius:50%;background:var(--n);border:1.5px solid var(--g);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:28px;line-height:1;color:var(--b);z-index:2;transition:background .2s,box-shadow .2s,color .2s;box-shadow:0 2px 8px rgba(15,34,54,0.08);padding:0}
+.res-arrow:hover{background:var(--r);color:#fff;border-color:var(--r)}
+.res-arrow-prev{left:-20px}
+.res-arrow-next{right:-20px}
+.res-dots{display:flex;justify-content:center;gap:8px;margin-top:20px}
+.res-dot{width:8px;height:8px;border-radius:50%;background:var(--g);cursor:pointer;transition:background .25s,transform .25s;border:none;padding:0;flex-shrink:0;outline:none}
+.res-dot.active{background:var(--r);transform:scale(1.3)}
 .res-card{background:var(--ns);border:1px solid var(--g);padding:24px;border-radius:12px;position:relative;transform-style:preserve-3d;will-change:transform;transition:border-color .3s,box-shadow .3s;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(15,34,54,0.05),0 1px 2px rgba(15,34,54,0.03)}
 .res-card:hover{border-color:rgba(21,101,192,0.28);box-shadow:0 14px 40px rgba(15,34,54,0.09),0 4px 10px rgba(21,101,192,0.07)}
 .res-halo{position:absolute;inset:0;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .3s}
@@ -724,7 +735,12 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
       </div>
     </div>
   </div>
-  <div class="res-cards" id="resCards"></div>
+  <div class="res-carousel">
+    <button class="res-arrow res-arrow-prev" id="resArrowPrev" aria-label="Reseña anterior">&#8249;</button>
+    <div class="res-cards" id="resCards"></div>
+    <button class="res-arrow res-arrow-next" id="resArrowNext" aria-label="Reseña siguiente">&#8250;</button>
+    <div class="res-dots" id="resDots"></div>
+  </div>
   <div class="res-cta-wrap">
     <a id="resVerBtn" href="https://www.google.com/maps/search/?api=1&query=Besso+Automotores+Ca%C3%B1ada+de+G%C3%B3mez" target="_blank" rel="noopener" class="res-ver-btn">
       <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -1586,9 +1602,66 @@ try {
         '</div>';
     }).join('');
     initResTilt();
+    // Carousel init
+    try{(function(){
+      var _rc=document.getElementById('resCards');
+      var _rd=document.getElementById('resDots');
+      var _rpv=document.getElementById('resArrowPrev');
+      var _rnx=document.getElementById('resArrowNext');
+      if(!_rc||!_rd)return;
+      var _rcds=_rc.querySelectorAll('.res-card');
+      var _rcn=_rcds.length;
+      if(_rcn<2)return;
+      var _rcat=null,_rcpause=false;
+      // Scroll target usando getBoundingClientRect (independiente del offsetParent)
+      function _rcScrollTo(idx){
+        var card=_rcds[idx];if(!card)return;
+        var tl=_rc.scrollLeft+(card.getBoundingClientRect().left-_rc.getBoundingClientRect().left);
+        _rc.scrollTo({left:tl,behavior:'smooth'});
+      }
+      function _rcGetIdx(){
+        var best=0,mn=Infinity,cl=_rc.getBoundingClientRect().left;
+        for(var i=0;i<_rcn;i++){
+          var d=Math.abs(_rcds[i].getBoundingClientRect().left-cl);
+          if(d<mn){mn=d;best=i;}
+        }
+        return best;
+      }
+      // Dots
+      var _rcdots=[];
+      for(var _di=0;_di<_rcn;_di++){
+        var _dot=document.createElement('button');
+        _dot.className='res-dot';
+        _dot.setAttribute('aria-label','Reseña '+(_di+1));
+        (function(idx){_dot.addEventListener('click',function(){_rcScrollTo(idx);_rcUpd(idx);_rcReset();});})(parseInt(_di));
+        _rd.appendChild(_dot);_rcdots.push(_dot);
+      }
+      function _rcUpd(idx){_rcdots.forEach(function(d,i){d.classList.toggle('active',i===idx);});}
+      _rcUpd(0);
+      // Flechas
+      if(_rpv)_rpv.addEventListener('click',function(){var i=(_rcGetIdx()-1+_rcn)%_rcn;_rcScrollTo(i);_rcUpd(i);_rcReset();});
+      if(_rnx)_rnx.addEventListener('click',function(){var i=(_rcGetIdx()+1)%_rcn;_rcScrollTo(i);_rcUpd(i);_rcReset();});
+      // Sync scroll → dots
+      var _rct2;
+      _rc.addEventListener('scroll',function(){
+        clearTimeout(_rct2);_rct2=setTimeout(function(){_rcUpd(_rcGetIdx());},80);
+      },{passive:true});
+      // Auto-avance
+      function _rcAdv(){if(_rcpause)return;var i=(_rcGetIdx()+1)%_rcn;_rcScrollTo(i);_rcUpd(i);}
+      function _rcStart(){clearInterval(_rcat);_rcat=setInterval(_rcAdv,4500);}
+      function _rcStop(){clearInterval(_rcat);}
+      function _rcReset(){_rcStop();_rcStart();}
+      // Pausa: mouse
+      _rc.addEventListener('mouseenter',function(){_rcpause=true;_rcStop();});
+      _rc.addEventListener('mouseleave',function(){_rcpause=false;_rcStart();});
+      // Pausa: touch / swipe
+      _rc.addEventListener('touchstart',function(){_rcpause=true;_rcStop();},{passive:true});
+      _rc.addEventListener('touchend',function(){setTimeout(function(){_rcpause=false;_rcStart();},700);},{passive:true});
+      _rcStart();
+    })();}catch(e){}
   }
 
-  
+
   var _rBtn=document.getElementById('resVerBtn');
   if(_rBtn)_rBtn.href=LINK_RESENAS;
 
