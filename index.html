@@ -304,6 +304,16 @@ footer{background:var(--n);border-top:1px solid var(--g);padding:32px 48px;displ
 .pa-cta:hover{background:#a8d4ff;box-shadow:0 8px 36px rgba(127,192,255,0.38)}
 .pa-reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease}
 .pa-reveal.visible{opacity:1;transform:translateY(0)}
+.pa-autos-wrap{margin-top:64px;padding-top:48px;border-top:1px solid rgba(255,255,255,0.1);text-align:left}
+.pa-autos-label{font-family:'Manrope',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(127,192,255,0.55);margin-bottom:28px}
+
+/* SECCIONES AUTOS */
+.cat-tabs{display:flex;gap:8px;margin-bottom:36px;flex-wrap:wrap}
+.cat-tab{font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;background:transparent;color:var(--gc);border:1.5px solid var(--g);padding:9px 22px;cursor:pointer;border-radius:100px;transition:border-color .2s,color .2s,background .2s}
+.cat-tab:hover{border-color:var(--r);color:var(--r)}
+.cat-tab.active{background:var(--r);border-color:var(--r);color:#fff}
+.sec-vacio{grid-column:1/-1;text-align:center;padding:56px 16px;font-family:'Manrope',sans-serif;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gc)}
+#seleccionados{background:var(--nm)}
 
 /* RESPONSIVE */
 @media(max-width:900px){
@@ -360,6 +370,9 @@ footer{background:var(--n);border-top:1px solid var(--g);padding:32px 48px;displ
   .pa-pilares{grid-template-columns:1fr;gap:16px}
   .pa-desc{font-size:14px;margin-bottom:40px}
   .pa-cta{padding:15px 32px;letter-spacing:2px}
+  .pa-autos-wrap{margin-top:40px;padding-top:32px}
+  .cat-tabs{gap:6px}
+  .cat-tab{font-size:11px;padding:8px 16px}
   .res-cards{grid-template-columns:1fr}
   .res-rating-block{gap:16px}
 }
@@ -448,8 +461,9 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
 <nav>
   <div class="logo"><img src="logo-besso.png" alt="Besso Automotores"></div>
   <ul class="nav-links">
-    <li><a href="#catalogo">Catálogo</a></li>
     <li><a href="#primer-auto">Primer Auto</a></li>
+    <li><a href="#categorias">Categorías</a></li>
+    <li><a href="#seleccionados">Seleccionados</a></li>
     <li><a href="#servicios">Servicios</a></li>
     <li><a href="#resenas">Reseñas</a></li>
     <li><a href="#contacto">Contacto</a></li>
@@ -503,10 +517,59 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
   </div>
 </div>
 
-<!-- CATÁLOGO -->
+<!-- MI PRIMER AUTO -->
+<section id="primer-auto">
+  <div class="pa-tag">Espacio exclusivo</div>
+  <h2 class="pa-title pa-reveal">TU PRIMER <span>AUTO</span></h2>
+  <p class="pa-desc pa-reveal">Un espacio pensado para los que arrancan. Variedad de marcas, precios accesibles y financiación a tu medida para que te subas a tu primer auto sin vueltas.</p>
+  <div class="pa-pilares">
+    <div class="pa-pilar pa-reveal" style="transition-delay:.08s">
+      <div class="pa-icon">🚗</div>
+      <div class="pa-pilar-title">Variedad de marcas</div>
+      <div class="pa-pilar-text">Usados chequeados de distintas marcas para elegir el que va con vos.</div>
+    </div>
+    <div class="pa-pilar pa-reveal" style="transition-delay:.18s">
+      <div class="pa-icon">💲</div>
+      <div class="pa-pilar-title">Precios accesibles</div>
+      <div class="pa-pilar-text">Unidades seleccionadas en rango de entrada, pensadas para tu primer paso.</div>
+    </div>
+    <div class="pa-pilar pa-reveal" style="transition-delay:.28s">
+      <div class="pa-icon">🤝</div>
+      <div class="pa-pilar-title">Financiación a tu medida</div>
+      <div class="pa-pilar-text">Cuotas y planes flexibles. Te ayudamos a que sea posible hoy.</div>
+    </div>
+  </div>
+  <a href="https://wa.me/5493471425309?text=Hola%20Besso%20Automotores%2C%20me%20interesa%20el%20espacio%20Tu%20Primer%20Auto" target="_blank" class="pa-cta pa-reveal" style="transition-delay:.36s">QUIERO MI PRIMER AUTO</a>
+  <div class="pa-autos-wrap">
+    <p class="pa-autos-label">Unidades disponibles</p>
+    <div class="cars-grid" id="primerAutoGrid"></div>
+  </div>
+</section>
+
+<!-- CATEGORÍAS -->
+<section id="categorias">
+  <div class="sec-tag reveal">Por tipo de vehículo</div>
+  <div class="sec-title reveal">Categorías</div>
+  <div class="cat-tabs">
+    <button class="cat-tab active" onclick="cambiarCategoria(this,'SUV')">SUV</button>
+    <button class="cat-tab" onclick="cambiarCategoria(this,'Pick Up')">Pick Up</button>
+    <button class="cat-tab" onclick="cambiarCategoria(this,'Toyota')">Toyota</button>
+    <button class="cat-tab" onclick="cambiarCategoria(this,'Multimarcas')">Multimarcas</button>
+  </div>
+  <div class="cars-grid" id="categoriasGrid"></div>
+</section>
+
+<!-- SELECCIONADOS -->
+<section id="seleccionados">
+  <div class="sec-tag reveal">Elegidos por Besso</div>
+  <div class="sec-title reveal">Seleccionados</div>
+  <div class="cars-grid" id="seleccionadosGrid"></div>
+</section>
+
+<!-- TODOS LOS AUTOS -->
 <section id="catalogo">
-  <div class="sec-tag reveal">Vehículos</div>
-  <div class="sec-title reveal">El catálogo</div>
+  <div class="sec-tag reveal">Ver todo</div>
+  <div class="sec-title reveal">Todos los autos</div>
   <div class="cat-ctrl">
     <div class="busq-wrap">
       <span class="busq-icon">🔍</span>
@@ -546,31 +609,6 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
     </div>
   </div>
 </div>
-
-<!-- TU PRIMER AUTO -->
-<section id="primer-auto">
-  <div class="pa-tag">Espacio exclusivo</div>
-  <h2 class="pa-title pa-reveal">TU PRIMER <span>AUTO</span></h2>
-  <p class="pa-desc pa-reveal">Un espacio pensado para los que arrancan. Variedad de marcas, precios accesibles y financiación a tu medida para que te subas a tu primer auto sin vueltas.</p>
-  <div class="pa-pilares">
-    <div class="pa-pilar pa-reveal" style="transition-delay:.08s">
-      <div class="pa-icon">🚗</div>
-      <div class="pa-pilar-title">Variedad de marcas</div>
-      <div class="pa-pilar-text">Usados chequeados de distintas marcas para elegir el que va con vos.</div>
-    </div>
-    <div class="pa-pilar pa-reveal" style="transition-delay:.18s">
-      <div class="pa-icon">💲</div>
-      <div class="pa-pilar-title">Precios accesibles</div>
-      <div class="pa-pilar-text">Unidades seleccionadas en rango de entrada, pensadas para tu primer paso.</div>
-    </div>
-    <div class="pa-pilar pa-reveal" style="transition-delay:.28s">
-      <div class="pa-icon">🤝</div>
-      <div class="pa-pilar-title">Financiación a tu medida</div>
-      <div class="pa-pilar-text">Cuotas y planes flexibles. Te ayudamos a que sea posible hoy.</div>
-    </div>
-  </div>
-  <a href="https://wa.me/5493471425309?text=Hola%20Besso%20Automotores%2C%20me%20interesa%20el%20espacio%20Tu%20Primer%20Auto" target="_blank" class="pa-cta pa-reveal" style="transition-delay:.36s">QUIERO MI PRIMER AUTO</a>
-</section>
 
 <!-- SERVICIOS -->
 <section id="servicios" style="padding:0">
@@ -861,7 +899,55 @@ let todosAutos=[],filtroActivo='todos',busqActiva='';
 
 async function cargarAutos(){
   try{todosAutos=await sbGet('autos');}catch{todosAutos=[];}
+  renderPrimerAuto();
+  renderCategorias();
+  renderSeleccionados();
   renderCatalogo();
+}
+
+function cardHtml(a){
+  const fotos=a.fotos||[];
+  const imgs=fotos.map((f,i)=>`<img class="car-gal-img${i===0?' active':''}" src="${f}" alt="${a.marca} ${a.modelo}"/>`).join('')||'<div style="width:100%;height:100%;background:var(--g);display:flex;align-items:center;justify-content:center;color:var(--gc);font-size:12px;">Sin foto</div>';
+  const dots=fotos.length>1?fotos.map((_,i)=>`<button class="gdot${i===0?' active':''}" onclick="event.stopPropagation();galIdx(this,${i})"></button>`).join(''):'';
+  const navs=fotos.length>1?`<button class="gal-prev" onclick="event.stopPropagation();galNav(this,-1)">&#8249;</button><button class="gal-next" onclick="event.stopPropagation();galNav(this,1)">&#8250;</button>`:'';
+  return`<div class="car-card" onclick="abrirModal('${a.id}')">
+    <div class="car-gal">${imgs}<span class="car-badge ${a.tipo==='nuevo'?'b-nuevo':'b-usado'}">${a.tipo==='nuevo'?'0km':'Usado'}</span>${navs}${fotos.length>1?`<div class="gal-dots">${dots}</div>`:''}</div>
+    <div class="car-info">
+      <div class="car-name">${a.marca} ${a.modelo}</div>
+      <div class="car-ver">${[a.version,a.anio].filter(Boolean).join(' · ')}</div>
+      <div class="car-specs">${[a.km,a.combustible,a.transmision].filter(Boolean).map(s=>`<span class="spec"><span class="spec-dot"></span>${s}</span>`).join('')}</div>
+      <div class="car-bot"><div class="car-price"><span>$</span>${a.precio}</div><button class="btn-ver" onclick="event.stopPropagation();abrirModal('${a.id}')">Ver detalle</button></div>
+    </div></div>`;
+}
+
+const SEC_VACIO='<div class="sec-vacio">Pronto, nuevas unidades.</div>';
+
+function renderPrimerAuto(){
+  const g=document.getElementById('primerAutoGrid');if(!g)return;
+  const lista=todosAutos.filter(a=>a.primer_auto);
+  g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
+  try{initTilt();}catch(e){}
+}
+
+let categActiva='SUV';
+function renderCategorias(cat){
+  if(cat)categActiva=cat;
+  const g=document.getElementById('categoriasGrid');if(!g)return;
+  const lista=todosAutos.filter(a=>a.categoria===categActiva);
+  g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
+  try{initTilt();}catch(e){}
+}
+function cambiarCategoria(btn,cat){
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCategorias(cat);
+}
+
+function renderSeleccionados(){
+  const g=document.getElementById('seleccionadosGrid');if(!g)return;
+  const lista=todosAutos.filter(a=>a.seleccionado);
+  g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
+  try{initTilt();}catch(e){}
 }
 
 function renderCatalogo(){
@@ -869,20 +955,7 @@ function renderCatalogo(){
   let lista=filtroActivo==='todos'?todosAutos:todosAutos.filter(a=>a.tipo===filtroActivo);
   if(busqActiva){const q=busqActiva.toLowerCase();lista=lista.filter(a=>(a.marca+' '+a.modelo).toLowerCase().includes(q));}
   if(!lista.length){g.innerHTML='<div class="no-autos">No se encontraron vehículos</div>';return;}
-  g.innerHTML=lista.map(a=>{
-    const fotos=a.fotos||[];
-    const imgs=fotos.map((f,i)=>`<img class="car-gal-img${i===0?' active':''}" src="${f}" alt="${a.marca} ${a.modelo}"/>`).join('')||'<div style="width:100%;height:100%;background:var(--g);display:flex;align-items:center;justify-content:center;color:var(--gc);font-size:12px;">Sin foto</div>';
-    const dots=fotos.length>1?fotos.map((_,i)=>`<button class="gdot${i===0?' active':''}" onclick="event.stopPropagation();galIdx(this,${i})"></button>`).join(''):'';
-    const navs=fotos.length>1?`<button class="gal-prev" onclick="event.stopPropagation();galNav(this,-1)">&#8249;</button><button class="gal-next" onclick="event.stopPropagation();galNav(this,1)">&#8250;</button>`:'';
-    return`<div class="car-card" onclick="abrirModal('${a.id}')">
-      <div class="car-gal">${imgs}<span class="car-badge ${a.tipo==='nuevo'?'b-nuevo':'b-usado'}">${a.tipo==='nuevo'?'0km':'Usado'}</span>${navs}${fotos.length>1?`<div class="gal-dots">${dots}</div>`:''}</div>
-      <div class="car-info">
-        <div class="car-name">${a.marca} ${a.modelo}</div>
-        <div class="car-ver">${[a.version,a.anio].filter(Boolean).join(' · ')}</div>
-        <div class="car-specs">${[a.km,a.combustible,a.transmision].filter(Boolean).map(s=>`<span class="spec"><span class="spec-dot"></span>${s}</span>`).join('')}</div>
-        <div class="car-bot"><div class="car-price"><span>$</span>${a.precio}</div><button class="btn-ver" onclick="event.stopPropagation();abrirModal('${a.id}')">Ver detalle</button></div>
-      </div></div>`;
-  }).join('');
+  g.innerHTML=lista.map(cardHtml).join('');
   try{initTilt();}catch(e){}
 }
 
@@ -1425,11 +1498,11 @@ try {
     initResTilt();
   }
 
-  // Botón ver todas
+  
   var _rBtn=document.getElementById('resVerBtn');
   if(_rBtn)_rBtn.href=LINK_RESENAS;
 
-  // Reveal escalonado
+ 
   var _rrvObs=new IntersectionObserver(function(entries){
     entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');_rrvObs.unobserve(e.target);}});
   },{threshold:0.04});
@@ -1439,7 +1512,7 @@ try {
   },6000);
 } catch(e){}
 
-// Tilt 3D tarjetas de reseñas (mismo gesto que las cards de autos)
+
 function initResTilt(){
   try{
     document.querySelectorAll('.res-card').forEach(function(card){
