@@ -462,7 +462,7 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
   <div class="logo"><img src="logo-besso.png" alt="Besso Automotores"></div>
   <ul class="nav-links">
     <li><a href="#primer-auto">Primer Auto</a></li>
-    <li><a href="#categorias">Categorías</a></li>
+    <li><a href="#categorias">Multimarca</a></li>
     <li><a href="#seleccionados">Seleccionados</a></li>
     <li><a href="#servicios">Servicios</a></li>
     <li><a href="#resenas">Reseñas</a></li>
@@ -546,16 +546,10 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
   </div>
 </section>
 
-<!-- CATEGORÍAS -->
+<!-- MULTIMARCA -->
 <section id="categorias">
-  <div class="sec-tag reveal">Por tipo de vehículo</div>
-  <div class="sec-title reveal">Categorías</div>
-  <div class="cat-tabs">
-    <button class="cat-tab active" onclick="cambiarCategoria(this,'SUV')">SUV</button>
-    <button class="cat-tab" onclick="cambiarCategoria(this,'Pick Up')">Pick Up</button>
-    <button class="cat-tab" onclick="cambiarCategoria(this,'Toyota')">Toyota</button>
-    <button class="cat-tab" onclick="cambiarCategoria(this,'Multimarcas')">Multimarcas</button>
-  </div>
+  <div class="sec-tag reveal">Variedad de marcas</div>
+  <div class="sec-title reveal">Multimarca</div>
   <div class="cars-grid" id="categoriasGrid"></div>
 </section>
 
@@ -774,12 +768,14 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
           <div class="af"><label>Tipo</label><select id="fTipo"><option value="usado">Usado</option><option value="nuevo">0km</option></select></div>
           <div class="af"><label>Combustible</label><select id="fCombustible"><option>Nafta</option><option>Diesel</option><option>GNC</option><option>Híbrido</option><option>Eléctrico</option></select></div>
         </div>
-        <div class="af-row">
-          <div class="af"><label>Categoría</label><select id="fCategoria"><option value="">— Sin categoría —</option><option value="SUV">SUV</option><option value="Pick Up">Pick Up</option><option value="Toyota">Toyota</option><option value="Multimarcas">Multimarcas</option></select></div>
-          <div class="af" style="display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:4px">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;letter-spacing:0;text-transform:none;color:var(--b);margin-bottom:10px"><input type="checkbox" id="fPrimerAuto" style="width:16px;height:16px;cursor:pointer;accent-color:var(--r)"/> Primer auto</label>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;letter-spacing:0;text-transform:none;color:var(--b)"><input type="checkbox" id="fSeleccionado" style="width:16px;height:16px;cursor:pointer;accent-color:var(--r)"/> Destacado / Seleccionado</label>
-          </div>
+        <div class="af">
+          <label>Sección</label>
+          <select id="fSeccion">
+            <option value="">Sin destacar — catálogo general</option>
+            <option value="primer_auto">Primer Auto</option>
+            <option value="seleccionado">Seleccionado</option>
+            <option value="multimarca">Multimarca</option>
+          </select>
         </div>
         <div class="af-row">
           <div class="af"><label>Kilómetros</label><input id="fKm" type="text" placeholder="45.000 km"/></div>
@@ -924,28 +920,21 @@ const SEC_VACIO='<div class="sec-vacio">Pronto, nuevas unidades.</div>';
 
 function renderPrimerAuto(){
   const g=document.getElementById('primerAutoGrid');if(!g)return;
-  const lista=todosAutos.filter(a=>a.primer_auto);
+  const lista=todosAutos.filter(a=>a.seccion==='primer_auto');
   g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
   try{initTilt();}catch(e){}
 }
 
-let categActiva='SUV';
-function renderCategorias(cat){
-  if(cat)categActiva=cat;
+function renderCategorias(){
   const g=document.getElementById('categoriasGrid');if(!g)return;
-  const lista=todosAutos.filter(a=>a.categoria===categActiva);
+  const lista=todosAutos.filter(a=>a.seccion==='multimarca');
   g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
   try{initTilt();}catch(e){}
-}
-function cambiarCategoria(btn,cat){
-  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderCategorias(cat);
 }
 
 function renderSeleccionados(){
   const g=document.getElementById('seleccionadosGrid');if(!g)return;
-  const lista=todosAutos.filter(a=>a.seleccionado);
+  const lista=todosAutos.filter(a=>a.seccion==='seleccionado');
   g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
   try{initTilt();}catch(e){}
 }
@@ -1183,7 +1172,7 @@ async function admGuardar(){
   if(!admFotos.length){toast('Agregá al menos una foto','r');return;}
   const btn=document.getElementById('btnGuardar');
   btn.disabled=true;btn.textContent='Guardando…';
-  const payload={marca,modelo,version:document.getElementById('fVersion').value.trim(),anio,tipo:document.getElementById('fTipo').value,combustible:document.getElementById('fCombustible').value,km:document.getElementById('fKm').value.trim(),transmision:document.getElementById('fTransmision').value,precio,descripcion:document.getElementById('fDesc').value.trim(),categoria:document.getElementById('fCategoria').value||null,primer_auto:document.getElementById('fPrimerAuto').checked,seleccionado:document.getElementById('fSeleccionado').checked,fotos:admFotos};
+  const payload={marca,modelo,version:document.getElementById('fVersion').value.trim(),anio,tipo:document.getElementById('fTipo').value,combustible:document.getElementById('fCombustible').value,km:document.getElementById('fKm').value.trim(),transmision:document.getElementById('fTransmision').value,precio,descripcion:document.getElementById('fDesc').value.trim(),seccion:document.getElementById('fSeccion').value||null,fotos:admFotos};
   try{
     const editId=document.getElementById('fEditId').value;
     if(editId){await sbPatch('autos',editId,payload);toast('Auto actualizado','v');}
@@ -1199,9 +1188,7 @@ function admLimpiar(){
   document.getElementById('fTipo').value='usado';
   document.getElementById('fCombustible').value='Nafta';
   document.getElementById('fTransmision').value='Automático';
-  document.getElementById('fCategoria').value='';
-  document.getElementById('fPrimerAuto').checked=false;
-  document.getElementById('fSeleccionado').checked=false;
+  document.getElementById('fSeccion').value='';
   admFotos=[];admRenderFotos();
   document.getElementById('formTit').innerHTML='Nuevo auto <span>+</span>';
   document.getElementById('btnGuardar').textContent='Guardar auto';
@@ -1247,9 +1234,7 @@ function admEditar(id){
   document.getElementById('fTransmision').value=a.transmision;
   document.getElementById('fPrecio').value=a.precio;
   document.getElementById('fDesc').value=a.descripcion||'';
-  document.getElementById('fCategoria').value=a.categoria||'';
-  document.getElementById('fPrimerAuto').checked=!!a.primer_auto;
-  document.getElementById('fSeleccionado').checked=!!a.seleccionado;
+  document.getElementById('fSeccion').value=a.seccion||'';
   document.getElementById('fEditId').value=a.id;
   admFotos=(a.fotos||[]);admRenderFotos();
   document.getElementById('formTit').innerHTML='Editar auto <span>✎</span>';
