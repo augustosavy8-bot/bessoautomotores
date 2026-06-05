@@ -190,6 +190,10 @@ footer{background:#0f2236;border-top:1px solid rgba(255,255,255,0.08);padding:32
 .footer-logo span{color:var(--r)}
 .footer-logo img{height:32px;width:auto;display:block}
 .footer-copy{font-size:13px;color:rgba(255,255,255,0.42)}
+.footer-foko{display:flex;align-items:center;gap:7px;text-decoration:none;opacity:.5;transition:opacity .25s}
+.footer-foko:hover{opacity:.9}
+.footer-foko-by{font-family:'Manrope',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.9)}
+.footer-foko img{height:20px;width:auto;display:block}
 
 /* ADMIN OVERLAY */
 .adm-ov{display:none;position:fixed;inset:0;z-index:9999;background:var(--n);overflow-y:auto}
@@ -778,6 +782,10 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
 <footer>
   <div class="footer-logo" id="footerLogo"><img src="logo-besso.png" alt="Besso Automotores"></div>
   <div class="footer-copy">© 2026 Besso Automotores. Todos los derechos reservados.</div>
+  <a href="https://instagram.com/foko" target="_blank" rel="noopener" class="footer-foko">
+    <span class="footer-foko-by">by</span>
+    <img src="logo-foko.png" alt="Foko MKT Digital"/>
+  </a>
 </footer>
 
 <!-- WA FLOAT -->
