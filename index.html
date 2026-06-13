@@ -197,18 +197,19 @@ footer{background:#0f2236;border-top:1px solid rgba(255,255,255,0.08);padding:32
 
 /* ADMIN OVERLAY */
 .adm-ov{display:none;position:fixed;inset:0;z-index:9999;background:var(--n);overflow-y:auto}
-.adm-login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse 60% 60% at 50% 40%,rgba(13,92,171,0.1) 0%,transparent 70%),var(--n)}
-.adm-login-box{background:var(--ns);border:1px solid var(--g);padding:48px 40px;width:340px;text-align:center}
-.adm-logo{font-family:'Fraunces',Georgia,serif;font-size:30px;letter-spacing:3px;margin-bottom:4px}
+.adm-login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse 60% 60% at 50% 40%,rgba(21,101,192,0.18) 0%,transparent 70%),#07111f}
+.adm-login-box{background:#0f2236;border:1px solid rgba(255,255,255,0.08);padding:48px 40px;width:340px;text-align:center}
+.adm-logo{font-family:'Fraunces',Georgia,serif;font-size:30px;letter-spacing:3px;margin-bottom:4px;color:#f1f4f8}
 .adm-logo span{color:var(--r)}
 .adm-logo img{height:48px;width:auto;display:block;margin:0 auto}
-.adm-sub{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gc);margin-bottom:32px}
-.adm-input{width:100%;background:var(--nm);border:1px solid var(--g);color:var(--b);padding:14px 16px;font-family:'Manrope',sans-serif;font-size:15px;outline:none;margin-bottom:12px;display:block;transition:border-color .2s}
+.adm-sub{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:32px}
+.adm-input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#f1f4f8;padding:14px 16px;font-family:'Manrope',sans-serif;font-size:15px;outline:none;margin-bottom:12px;display:block;transition:border-color .2s}
+.adm-input::placeholder{color:rgba(255,255,255,0.3)}
 .adm-input:focus{border-color:var(--r)}
-.adm-err{color:#ff6666;font-size:13px;margin-bottom:12px;display:none}
+.adm-err{color:#ff6b6b;font-size:13px;margin-bottom:12px;display:none}
 .adm-btn-in{width:100%;background:var(--r);color:#fff;border:none;padding:16px;font-family:'Manrope',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:10px}
 .adm-btn-in:hover{background:var(--rv)}
-.adm-btn-out{width:100%;background:transparent;color:var(--gc);border:1px solid var(--g);padding:12px;font-family:'Manrope',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
+.adm-btn-out{width:100%;background:transparent;color:rgba(255,255,255,0.35);border:1px solid rgba(255,255,255,0.12);padding:12px;font-family:'Manrope',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
 .adm-panel{display:none}
 .adm-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(13,92,171,0.2);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between}
 .adm-header-logo{font-family:'Fraunces',Georgia,serif;font-size:20px;letter-spacing:3px}
