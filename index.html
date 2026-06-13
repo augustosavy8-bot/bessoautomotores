@@ -834,6 +834,7 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
       <button class="adm-tab on" data-tab="tForm">＋ Nuevo auto</button>
       <button class="adm-tab" data-tab="tAutos">Autos <span class="cnt-badge" id="cntAutos">0</span></button>
       <button class="adm-tab" data-tab="tConsultas">Consultas <span class="cnt-badge v" id="cntCons">0</span></button>
+      <button class="adm-tab" data-tab="tVideo">Hero / Video</button>
     </div>
 
     <!-- FORM -->
@@ -914,6 +915,32 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
         <div id="listaConsultas"></div>
       </div>
     </div>
+
+    <!-- VIDEO HERO -->
+    <div class="adm-pane" id="tVideo">
+      <div class="adm-form">
+        <h2>Video del <span>Hero</span></h2>
+        <div class="af">
+          <label>Vista previa del video actual</label>
+          <video id="admVidPreview" muted loop playsinline controls style="width:100%;max-height:240px;border-radius:4px;background:#111;display:block"></video>
+        </div>
+        <div class="af">
+          <label>URL de video (.mp4)</label>
+          <input id="admVidUrl" type="url" placeholder="https://ejemplo.com/video.mp4"/>
+        </div>
+        <div style="text-align:center;font-size:12px;color:var(--gc);margin:4px 0 20px">— o subí un archivo —</div>
+        <div class="af">
+          <label>Subir video desde tu dispositivo</label>
+          <div style="font-size:12px;color:var(--gc);margin-bottom:10px">Formato: <strong>.mp4</strong> · Peso recomendado: <strong>menos de 15–20 MB</strong>. Videos pesados demoran en cargar y perjudican la experiencia del usuario.</div>
+          <input type="file" id="admVidFile" accept="video/mp4,video/*"/>
+        </div>
+        <div id="admVidMsg" style="display:none;padding:10px 14px;border-radius:4px;background:#e8f5e9;color:#2e7d32;font-size:13px;margin-bottom:16px"></div>
+        <div class="adm-btns">
+          <button class="adm-save" id="btnGuardarVideo">Guardar video</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -969,6 +996,19 @@ async function sbSubirFoto(dataUrl){
   if(!up.ok)throw new Error('Upload '+up.status);
   return SB_URL+'/storage/v1/object/public/autos/'+nombre;
 }
+async function sbUpsertConfig(clave,valor){
+  var h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'};
+  var r=await fetch(SB_URL+'/rest/v1/config',{method:'POST',headers:h,body:JSON.stringify({clave:clave,valor:valor})});
+  if(!r.ok)throw new Error('sbUpsertConfig '+r.status);
+  return true;
+}
+async function sbSubirVideo(file){
+  var ext=(file.name.split('.').pop()||'mp4').toLowerCase();
+  var nombre='hero/'+Date.now().toString(36)+'.'+ext;
+  var up=await fetch(SB_URL+'/storage/v1/object/autos/'+nombre,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type||'video/mp4','Cache-Control':'3600','x-upsert':'true'},body:file});
+  if(!up.ok)throw new Error('Upload video '+up.status);
+  return SB_URL+'/storage/v1/object/public/autos/'+nombre;
+}
 
 // ── VIDEO ──
 const vid=document.getElementById('heroVid');
@@ -983,6 +1023,24 @@ if(vid){
   if(vid.readyState>=2)tryPlay();
   document.addEventListener('touchstart',()=>{if(vid.paused)vid.play().catch(()=>{});},{once:true});
 }
+
+// Reemplaza el video del hero si hay uno guardado en config
+(async function(){
+  try{
+    var _r=await fetch(SB_URL+'/rest/v1/config?clave=eq.hero_video&select=valor',{headers:_SBH});
+    if(!_r.ok)return;
+    var _d=await _r.json();
+    if(!_d||!_d.length||!_d[0].valor)return;
+    var _v=document.getElementById('heroVid');
+    if(!_v)return;
+    _v.querySelectorAll('source').forEach(function(s){s.remove();});
+    var _s=document.createElement('source');
+    _s.src=_d[0].valor;_s.type='video/mp4';
+    _v.appendChild(_s);
+    _v.load();
+    _v.play().catch(function(){});
+  }catch(e){}
+})();
 
 // ── CATÁLOGO ──
 let todosAutos=[],filtroActivo='todos',busqActiva='';
@@ -1175,6 +1233,7 @@ document.querySelectorAll('.adm-tab').forEach(btn=>{
     document.getElementById(btn.dataset.tab).classList.add('on');
     if(btn.dataset.tab==='tConsultas')admCargarConsultas();
     if(btn.dataset.tab==='tAutos')admCargarAutos();
+    if(btn.dataset.tab==='tVideo')admCargarVideo();
   });
 });
 
@@ -1399,12 +1458,60 @@ async function admEliminarConsulta(id){
   else toast('Error al eliminar','error');
 }
 
+// Video Hero — admin
+async function admCargarVideo(){
+  try{
+    var _vr=await fetch(SB_URL+'/rest/v1/config?clave=eq.hero_video&select=valor',{headers:_SBH});
+    var _vd=_vr.ok?await _vr.json():[];
+    var _vu=(_vd&&_vd.length)?_vd[0].valor:'';
+    var _vInput=document.getElementById('admVidUrl');
+    var _vPrev=document.getElementById('admVidPreview');
+    if(_vu){_vInput.value=_vu;_vPrev.src=_vu;_vPrev.load();}
+    else{_vPrev.src='https://videos.pexels.com/video-files/854745/854745-hd_1280_720_50fps.mp4';_vPrev.load();}
+  }catch(e){}
+}
+async function admGuardarVideo(){
+  var _btn=document.getElementById('btnGuardarVideo');
+  var _msg=document.getElementById('admVidMsg');
+  var _fi=document.getElementById('admVidFile');
+  var _ui=document.getElementById('admVidUrl');
+  var _url=_ui.value.trim();
+  if(_fi.files&&_fi.files[0]){
+    var _f=_fi.files[0];
+    if(_f.size>30*1024*1024){toast('El video es muy pesado. Usá uno de menos de 15–20 MB.','r');return;}
+    _btn.disabled=true;_btn.textContent='Subiendo video…';
+    try{_url=await sbSubirVideo(_f);_fi.value='';}
+    catch(_e){toast('Error al subir el video: '+_e.message,'r');_btn.disabled=false;_btn.textContent='Guardar video';return;}
+  }
+  if(!_url){toast('Ingresá una URL o subí un video','r');return;}
+  _btn.disabled=true;_btn.textContent='Guardando…';
+  try{
+    await sbUpsertConfig('hero_video',_url);
+    _ui.value=_url;
+    var _vp=document.getElementById('admVidPreview');
+    _vp.src=_url;_vp.load();
+    var _hv=document.getElementById('heroVid');
+    if(_hv){
+      _hv.querySelectorAll('source').forEach(function(s){s.remove();});
+      var _hs=document.createElement('source');_hs.src=_url;_hs.type='video/mp4';
+      _hv.appendChild(_hs);
+      _hv.load();_hv.play().catch(function(){});
+    }
+    _msg.textContent='Video guardado correctamente.';_msg.style.display='block';
+    setTimeout(function(){_msg.style.display='none';},4000);
+    toast('Video guardado','v');
+  }catch(_e){toast('Error al guardar el video','r');}
+  _btn.disabled=false;_btn.textContent='Guardar video';
+}
+
 // Toast
 function toast(msg,tipo){
   const t=document.getElementById('toast');
   t.textContent=msg;t.className='toast '+(tipo||'')+' show';
   setTimeout(()=>t.classList.remove('show'),3000);
 }
+
+try{document.getElementById('btnGuardarVideo').addEventListener('click',admGuardarVideo);}catch(e){}
 
 // Init
 cargarAutos();
