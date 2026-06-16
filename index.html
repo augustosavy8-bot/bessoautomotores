@@ -249,6 +249,7 @@ footer{background:#0f2236;border-top:1px solid rgba(255,255,255,0.08);padding:32
 .ft-principal{position:absolute;top:4px;left:4px;background:var(--r);color:#fff;font-family:'Manrope',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 6px}
 .ft-rm{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.8);color:#fff;border:none;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
 .ft-rm:hover{background:var(--r)}
+.ft-peso{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.65);color:#fff;font-family:'Manrope',sans-serif;font-size:9px;letter-spacing:1px;padding:2px 6px;pointer-events:none}
 .adm-btns{display:flex;gap:12px;margin-top:8px}
 .adm-save{flex:1;font-family:'Manrope',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;background:var(--r);color:#fff;border:none;padding:16px;cursor:pointer}
 .adm-save:hover{background:var(--rv)}
@@ -1134,9 +1135,15 @@ async function cargarAutos(){
   renderCatalogo();
 }
 
+function imgSrc(url,w,q){
+  if(url&&url.includes('supabase.co/storage/v1/object/public/'))
+    return url+'?width='+w+'&quality='+q;
+  return url;
+}
+
 function cardHtml(a){
   const fotos=a.fotos||[];
-  const imgs=fotos.map((f,i)=>`<img class="car-gal-img${i===0?' active':''}" src="${f}" alt="${a.marca} ${a.modelo}"/>`).join('')||'<div style="width:100%;height:100%;background:var(--g);display:flex;align-items:center;justify-content:center;color:var(--gc);font-size:12px;">Sin foto</div>';
+  const imgs=fotos.map((f,i)=>`<img class="car-gal-img${i===0?' active':''}" src="${imgSrc(f,600,75)}" loading="lazy" alt="${a.marca} ${a.modelo}"/>`).join('')||'<div style="width:100%;height:100%;background:var(--g);display:flex;align-items:center;justify-content:center;color:var(--gc);font-size:12px;">Sin foto</div>';
   const dots=fotos.length>1?fotos.map((_,i)=>`<button class="gdot${i===0?' active':''}" onclick="event.stopPropagation();galIdx(this,${i})"></button>`).join(''):'';
   const navs=fotos.length>1?`<button class="gal-prev" onclick="event.stopPropagation();galNav(this,-1)">&#8249;</button><button class="gal-next" onclick="event.stopPropagation();galNav(this,1)">&#8250;</button>`:'';
   return`<div class="car-card" onclick="abrirModal('${a.id}')">
@@ -1196,7 +1203,7 @@ function abrirModal(id){
   const gal=document.getElementById('modalGal');
   gal.innerHTML='';
   if(mFotos.length){
-    mFotos.forEach((f,i)=>{const img=document.createElement('img');img.src=f;img.className='modal-gal-img'+(i===0?' active':'');gal.appendChild(img);});
+    mFotos.forEach((f,i)=>{const img=document.createElement('img');img.src=imgSrc(f,1200,80);img.loading='lazy';img.className='modal-gal-img'+(i===0?' active':'');gal.appendChild(img);});
     if(mFotos.length>1){
       gal.innerHTML+=`<button class="modal-prev" onclick="mNav(-1)">&#8249;</button><button class="modal-next" onclick="mNav(1)">&#8250;</button><div class="modal-mdots">${mFotos.map((_,i)=>`<button class="mdot${i===0?' active':''}" onclick="mIr(${i})"></button>`).join('')}</div><div class="modal-cnt" id="mCnt">1 / ${mFotos.length}</div>`;
     }
@@ -1341,7 +1348,7 @@ document.querySelectorAll('[data-filtro2]').forEach(btn=>{
 });
 
 // Fotos
-let admFotos=[]; // array de URLs de Cloudinary
+let admFotos=[],admFotosPesos=[];
 
 document.getElementById('fotosInput').addEventListener('change',function(){admAgregarFotos(this.files);this.value='';});
 const fz=document.getElementById('fotosZona');
@@ -1366,8 +1373,12 @@ async function admAgregarFotos(files){
             if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
             canvas.width=w;canvas.height=h;
             canvas.getContext('2d').drawImage(img,0,0,w,h);
-            const url=await sbSubirFoto(canvas.toDataURL('image/jpeg',0.8));
-            resolve(url);
+            let dataUrl=canvas.toDataURL('image/jpeg',0.72);
+            const _bLen=d=>Math.round((d.length-d.indexOf(',')-1)*3/4);
+            if(_bLen(dataUrl)>200*1024)dataUrl=canvas.toDataURL('image/jpeg',0.55);
+            const pesoKB=Math.round(_bLen(dataUrl)/1024);
+            const url=await sbSubirFoto(dataUrl);
+            resolve({url,pesoKB});
           }catch(err){toast('Error al subir foto: '+err.message,'r');resolve(null);}
         };
         img.onerror=()=>resolve(null);
@@ -1376,18 +1387,22 @@ async function admAgregarFotos(files){
       reader.onerror=()=>resolve(null);
       reader.readAsDataURL(file);
     })));
-    const urls=resultados.filter(Boolean);
-    if(urls.length)admFotos=[...admFotos,...urls];
+    const validos=resultados.filter(Boolean);
+    if(validos.length){
+      admFotos=[...admFotos,...validos.map(r=>r.url)];
+      admFotosPesos=[...admFotosPesos,...validos.map(r=>r.pesoKB)];
+    }
     admRenderFotos();
   }catch(e){toast('Error al subir fotos','r');}
   btnG.disabled=false;btnG.textContent=document.getElementById('fEditId').value?'Actualizar auto':'Guardar auto';
 }
-function admQuitarFoto(i){admFotos.splice(i,1);admRenderFotos();}
+function admQuitarFoto(i){admFotos.splice(i,1);admFotosPesos.splice(i,1);admRenderFotos();}
 function admRenderFotos(){
   document.getElementById('fotosGrid').innerHTML=admFotos.map((f,i)=>`
     <div class="ft-wrap">
       <img class="ft-img" src="${f}"/>
       ${i===0?'<div class="ft-principal">Principal</div>':''}
+      ${admFotosPesos[i]!=null?`<div class="ft-peso">${admFotosPesos[i]} KB</div>`:''}
       <button class="ft-rm" onclick="admQuitarFoto(${i})">✕</button>
     </div>`).join('');
   fz.style.opacity=admFotos.length>=6?'0.5':'1';
@@ -1423,7 +1438,7 @@ function admLimpiar(){
   document.getElementById('fCombustible').value='Nafta';
   document.getElementById('fTransmision').value='Automático';
   document.getElementById('fSeccion').value='';
-  admFotos=[];admRenderFotos();
+  admFotos=[];admFotosPesos=[];admRenderFotos();
   document.getElementById('formTit').innerHTML='Nuevo auto <span>+</span>';
   document.getElementById('btnGuardar').textContent='Guardar auto';
   document.getElementById('btnCancelar').style.display='none';
@@ -1470,7 +1485,7 @@ function admEditar(id){
   document.getElementById('fDesc').value=a.descripcion||'';
   document.getElementById('fSeccion').value=a.seccion||'';
   document.getElementById('fEditId').value=a.id;
-  admFotos=(a.fotos||[]);admRenderFotos();
+  admFotos=(a.fotos||[]);admFotosPesos=new Array(admFotos.length).fill(null);admRenderFotos();
   document.getElementById('formTit').innerHTML='Editar auto <span>✎</span>';
   document.getElementById('btnGuardar').textContent='Actualizar auto';
   document.getElementById('btnCancelar').style.display='block';
