@@ -1030,10 +1030,10 @@ var RESENAS_TXT=[
 
 // ══════════════════════════════════════════
 // SUPABASE — conexión (editar si cambia el proyecto)
-// SB_URL: ref derivado del JWT → hrzttuxgfrmtudvqwjlb
+// SB_URL: ref derivado del JWT → inkbbfzdrzrnqjjjlquw
 // ══════════════════════════════════════════
-const SB_URL='https://hrzttuxgfrmtudvqwjlb.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyenR0dXhnZnJtdHVkdnF3amxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2ODYzOTEsImV4cCI6MjA5NjI2MjM5MX0.7Ubo32uNjCs63YS5GRZCF_-1-76xaymzXWJcEI8rTyY';
+const SB_URL='https://inkbbfzdrzrnqjjjlquw.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlua2JiZnpkcnpybnFqampscXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzOTg1NzAsImV4cCI6MjA5Nzk3NDU3MH0.A1oJAON35xVnIlCy7Wcoq7eb4KaUAiRkcKBbtg0k4vM';
 const _SBH={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
 
 async function sbGet(t,params){
@@ -1237,7 +1237,7 @@ async function enviarConsulta(){
   if(!nombre||!telefono){alert('Completá nombre y teléfono');return;}
   const _sobre=document.getElementById('cSobre').value;
   const _texto=document.getElementById('cMensaje').value.trim();
-  const ok=await sbPost('consultas',{nombre,telefono,mensaje:(_sobre?_sobre+': ':'')+_texto,leida:false});
+  const ok=await sbPost('consultas',{nombre,telefono,mensaje:_texto,auto:_sobre||null,leida:false});
   if(ok){document.getElementById('formContacto').style.display='none';document.getElementById('formOk').style.display='block';}
   else{alert('Error al enviar. Intentá por WhatsApp.');}
 }
