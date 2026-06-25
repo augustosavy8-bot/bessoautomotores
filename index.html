@@ -1034,7 +1034,7 @@ var RESENAS_TXT=[
 // ══════════════════════════════════════════
 const SB_URL='https://inkbbfzdrzrnqjjjlquw.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlua2JiZnpkcnpybnFqampscXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzOTg1NzAsImV4cCI6MjA5Nzk3NDU3MH0.A1oJAON35xVnIlCy7Wcoq7eb4KaUAiRkcKBbtg0k4vM';
-const _SBH={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+const _SBH={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
 
 async function sbGet(t,params){
   const q=params?'?'+params+'&order=created_at.desc':'?order=created_at.desc';
