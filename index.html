@@ -1147,7 +1147,7 @@ function cardHtml(a){
   const dots=fotos.length>1?fotos.map((_,i)=>`<button class="gdot${i===0?' active':''}" onclick="event.stopPropagation();galIdx(this,${i})"></button>`).join(''):'';
   const navs=fotos.length>1?`<button class="gal-prev" onclick="event.stopPropagation();galNav(this,-1)">&#8249;</button><button class="gal-next" onclick="event.stopPropagation();galNav(this,1)">&#8250;</button>`:'';
   return`<div class="car-card" onclick="abrirModal('${a.id}')">
-    <div class="car-gal">${imgs}<span class="car-badge ${a.tipo==='nuevo'?'b-nuevo':'b-usado'}">${a.tipo==='nuevo'?'0km':'Usado'}</span>${navs}${fotos.length>1?`<div class="gal-dots">${dots}</div>`:''}</div>
+    <div class="car-gal">${imgs}<span class="car-badge ${a.tipo==='nuevo'?'b-nuevo':'b-usado'}">${a.tipo==='nuevo'?'0km':'Usado'}</span>${a.estado==='reservado'?`<span class="car-badge" style="left:auto;right:14px;background:rgba(180,83,9,0.92);color:#fff;">Reservado</span>`:''}${navs}${fotos.length>1?`<div class="gal-dots">${dots}</div>`:''}</div>
     <div class="car-info">
       <div class="car-name">${a.marca} ${a.modelo}</div>
       <div class="car-ver">${[a.version,a.anio].filter(Boolean).join(' · ')}</div>
@@ -1158,30 +1158,34 @@ function cardHtml(a){
 
 const SEC_VACIO='<div class="sec-vacio">Pronto, nuevas unidades.</div>';
 
+// La web no muestra autos vendidos (estado lo administra el CRM).
+const esVisibleWeb=a=>a.estado!=='vendido';
+
 function renderPrimerAuto(){
   const g=document.getElementById('primerAutoGrid');if(!g)return;
-  const lista=todosAutos.filter(a=>a.seccion==='primer_auto');
+  const lista=todosAutos.filter(a=>esVisibleWeb(a)&&a.seccion==='primer_auto');
   g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
   try{initTilt();}catch(e){}
 }
 
 function renderCategorias(){
   const g=document.getElementById('categoriasGrid');if(!g)return;
-  const lista=todosAutos.filter(a=>a.seccion==='multimarca');
+  const lista=todosAutos.filter(a=>esVisibleWeb(a)&&a.seccion==='multimarca');
   g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
   try{initTilt();}catch(e){}
 }
 
 function renderSeleccionados(){
   const g=document.getElementById('seleccionadosGrid');if(!g)return;
-  const lista=todosAutos.filter(a=>a.seccion==='seleccionado');
+  const lista=todosAutos.filter(a=>esVisibleWeb(a)&&a.seccion==='seleccionado');
   g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
   try{initTilt();}catch(e){}
 }
 
 function renderCatalogo(){
   const g=document.getElementById('carsGrid');
-  let lista=filtroActivo==='todos'?todosAutos:todosAutos.filter(a=>a.tipo===filtroActivo);
+  let lista=todosAutos.filter(esVisibleWeb);
+  if(filtroActivo!=='todos'){lista=lista.filter(a=>a.tipo===filtroActivo);}
   if(busqActiva){const q=busqActiva.toLowerCase();lista=lista.filter(a=>(a.marca+' '+a.modelo).toLowerCase().includes(q));}
   if(!lista.length){g.innerHTML='<div class="no-autos">No se encontraron vehículos</div>';return;}
   g.innerHTML=lista.map(cardHtml).join('');
