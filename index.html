@@ -1202,7 +1202,7 @@ function galNav(btn,dir){const g=btn.closest('.car-gal');const imgs=g.querySelec
 let mFotos=[],mFotoCur=0,mAutoSel=null;
 
 function abrirModal(id){
-  const a=todosAutos.find(x=>x.id===id);if(!a)return;
+  const a=todosAutos.find(x=>String(x.id)===String(id));if(!a)return;
   mAutoSel=a;mFotos=a.fotos||[];mFotoCur=0;
   const gal=document.getElementById('modalGal');
   gal.innerHTML='';
@@ -1476,7 +1476,7 @@ function admRenderAutos(){
 }
 
 function admEditar(id){
-  const a=admAutosData.find(x=>x.id===id);if(!a)return;
+  const a=admAutosData.find(x=>String(x.id)===String(id));if(!a)return;
   document.getElementById('fMarca').value=a.marca;
   document.getElementById('fModelo').value=a.modelo;
   document.getElementById('fVersion').value=a.version||'';
@@ -1548,7 +1548,7 @@ function admRenderConsultas(){
 
 async function admMarcarLeida(id){
   const ok=await sbPatch('consultas',id,{leida:true});
-  if(ok){const c=admConsultasData.find(x=>x.id===id);if(c)c.leida=true;admRenderConsultas();admContadorConsultas();}
+  if(ok){const c=admConsultasData.find(x=>String(x.id)===String(id));if(c)c.leida=true;admRenderConsultas();admContadorConsultas();}
 }
 
 async function admEliminarConsulta(id){
