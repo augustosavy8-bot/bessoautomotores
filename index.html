@@ -92,13 +92,21 @@ section{padding:108px 48px}
 .fb{font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;background:transparent;color:var(--gc);border:1px solid var(--g);padding:8px 20px;cursor:pointer;transition:all .2s}
 .fb:hover,.fb.active{background:var(--r);border-color:var(--r);color:#fff}
 .cars-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
+/* Carrusel horizontal del catálogo general */
+.cat-carrusel{position:relative}
+.cars-carrusel{display:flex;gap:24px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:4px 2px 14px}
+.cars-carrusel::-webkit-scrollbar{display:none}
+.cars-carrusel>*{flex:0 0 clamp(260px,28vw,320px);scroll-snap-align:start}
+.carr-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:46px;height:46px;border-radius:50%;border:1px solid var(--g);background:var(--ns);color:var(--b);font-size:26px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(15,34,54,.14);transition:background .2s,color .2s,border-color .2s}
+.carr-arrow:hover{background:var(--r);color:#fff;border-color:var(--r)}
+.carr-prev{left:-6px}.carr-next{right:-6px}
 .skel{background:var(--ns);border:1px solid var(--g);height:340px;position:relative;overflow:hidden}
 .skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);animation:shim 1.4s infinite}
 @keyframes shim{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 .car-card{background:var(--ns);border:1px solid var(--g);overflow:hidden;transition:border-color .3s,box-shadow .3s;cursor:pointer;position:relative;transform-style:preserve-3d;will-change:transform}
 .car-card:hover{border-color:rgba(21,101,192,0.4);box-shadow:0 16px 40px rgba(15,34,54,0.1),0 4px 12px rgba(21,101,192,0.08)}
-.car-gal{position:relative;height:210px;overflow:hidden;background:var(--g)}
-.car-gal-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease}
+.car-gal{position:relative;height:280px;overflow:hidden;background:var(--g)}
+.car-gal-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;opacity:0;transition:opacity .4s ease}
 .car-gal-img.active{opacity:1}
 .gal-prev,.gal-next{position:absolute;top:50%;transform:translateY(-50%);z-index:5;background:rgba(0,0,0,0.55);border:none;color:#fff;font-size:22px;width:32px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
 .gal-prev{left:0}.gal-next{right:0}
@@ -386,7 +394,10 @@ footer{background:#0f2236;border-top:1px solid rgba(255,255,255,0.08);padding:32
   .fb{padding:10px 14px;min-height:44px;font-size:12px;flex:1;text-align:center}
   .busq-wrap input{min-height:44px}
   .cars-grid{grid-template-columns:1fr;gap:14px}
-  .car-gal{height:210px}
+  .car-gal{height:240px}
+  .cars-carrusel{gap:14px}
+  .cars-carrusel>*{flex-basis:80%}
+  .carr-arrow{display:none}
   .gal-prev,.gal-next{opacity:.7}
   .car-info{padding:16px}
   .btn-ver{min-height:40px;padding:10px 14px}
@@ -728,8 +739,12 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
       <button class="fb" onclick="filtrar(this,'nuevo')">0km</button>
     </div>
   </div>
-  <div class="cars-grid" id="carsGrid">
-    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  <div class="cat-carrusel">
+    <button class="carr-arrow carr-prev" onclick="carrNav(-1)" aria-label="Ver anteriores">&#8249;</button>
+    <div class="cars-carrusel" id="carsGrid">
+      <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    </div>
+    <button class="carr-arrow carr-next" onclick="carrNav(1)" aria-label="Ver siguientes">&#8250;</button>
   </div>
 </section>
 
@@ -1209,6 +1224,14 @@ function renderCatalogo(){
 
 function filtrar(btn,tipo){filtroActivo=tipo;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderCatalogo();}
 function buscar(){busqActiva=document.getElementById('busq').value.trim();renderCatalogo();}
+
+// Flechas del carrusel del catálogo: avanza/retrocede un ancho de card + gap.
+function carrNav(dir){
+  const t=document.getElementById('carsGrid');if(!t)return;
+  const card=t.querySelector('.car-card');
+  const step=card?card.getBoundingClientRect().width+24:t.clientWidth*0.85;
+  t.scrollBy({left:dir*step,behavior:'smooth'});
+}
 
 function galIdx(dot,idx){const g=dot.closest('.car-gal');g.querySelectorAll('.car-gal-img').forEach((img,i)=>img.classList.toggle('active',i===idx));g.querySelectorAll('.gdot').forEach((d,i)=>d.classList.toggle('active',i===idx));}
 function galNav(btn,dir){const g=btn.closest('.car-gal');const imgs=g.querySelectorAll('.car-gal-img');let cur=0;imgs.forEach((img,i)=>{if(img.classList.contains('active'))cur=i;});const next=(cur+dir+imgs.length)%imgs.length;imgs.forEach((img,i)=>img.classList.toggle('active',i===next));g.querySelectorAll('.gdot').forEach((d,i)=>d.classList.toggle('active',i===next));}
