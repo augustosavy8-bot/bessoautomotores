@@ -97,8 +97,8 @@ section{padding:108px 48px}
 @keyframes shim{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 .car-card{background:var(--ns);border:1px solid var(--g);overflow:hidden;transition:border-color .3s,box-shadow .3s;cursor:pointer;position:relative;transform-style:preserve-3d;will-change:transform}
 .car-card:hover{border-color:rgba(21,101,192,0.4);box-shadow:0 16px 40px rgba(15,34,54,0.1),0 4px 12px rgba(21,101,192,0.08)}
-.car-gal{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--g)}
-.car-gal-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;opacity:0;transition:opacity .4s ease}
+.car-gal{position:relative;height:210px;overflow:hidden;background:var(--g)}
+.car-gal-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease}
 .car-gal-img.active{opacity:1}
 .gal-prev,.gal-next{position:absolute;top:50%;transform:translateY(-50%);z-index:5;background:rgba(0,0,0,0.55);border:none;color:#fff;font-size:22px;width:32px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
 .gal-prev{left:0}.gal-next{right:0}
@@ -386,7 +386,7 @@ footer{background:#0f2236;border-top:1px solid rgba(255,255,255,0.08);padding:32
   .fb{padding:10px 14px;min-height:44px;font-size:12px;flex:1;text-align:center}
   .busq-wrap input{min-height:44px}
   .cars-grid{grid-template-columns:1fr;gap:14px}
-  .car-gal{aspect-ratio:4/3}
+  .car-gal{height:210px}
   .gal-prev,.gal-next{opacity:.7}
   .car-info{padding:16px}
   .btn-ver{min-height:40px;padding:10px 14px}
@@ -1135,11 +1135,11 @@ async function cargarAutos(){
   renderCatalogo();
 }
 
-function imgSrc(url,w,q){
-  if(url&&url.includes('/storage/v1/object/public/'))
-    return url.replace('/storage/v1/object/public/','/storage/v1/render/image/public/')
-              +'?width='+w+'&quality='+q;
-  return url; // no es Supabase Storage → se deja tal cual
+function imgSrc(url){
+  // Se sirve la imagen directa del Storage (object/public), sin render/image.
+  // La compresión real ya se hace al subir desde el CRM (canvas), así que no
+  // hace falta la transformación de Supabase (que además consume cuota).
+  return url||'';
 }
 // Fallback si la transformación no está habilitada en el plan: vuelve a la original.
 function imgErr(img){
