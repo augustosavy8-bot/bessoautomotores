@@ -344,7 +344,6 @@ footer{background:#0f2236;border-top:1px solid rgba(255,255,255,0.08);padding:32
 .cat-tab:hover{border-color:var(--r);color:var(--r)}
 .cat-tab.active{background:var(--r);border-color:var(--r);color:#fff}
 .sec-vacio{grid-column:1/-1;text-align:center;padding:56px 16px;font-family:'Manrope',sans-serif;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gc)}
-#seleccionados{background:var(--nm)}
 
 /* RESPONSIVE */
 @media(max-width:900px){
@@ -622,9 +621,7 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
 <nav>
   <div class="logo"><img src="logo-besso.png" alt="Besso Automotores"></div>
   <ul class="nav-links" id="navLinks">
-    <li><a href="#primer-auto">Primer Auto</a></li>
-    <li><a href="#categorias">Multimarca</a></li>
-    <li><a href="#seleccionados">Seleccionados</a></li>
+    <!-- Los links de sección (Tu Primer Auto, Multimarca, Toyota, etc.) los genera buildNavSecs() según las secciones con autos -->
     <li><a href="#servicios">Servicios</a></li>
     <li><a href="#resenas">Reseñas</a></li>
     <li><a href="#contacto">Contacto</a></li>
@@ -710,19 +707,9 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
   </div>
 </section>
 
-<!-- MULTIMARCA -->
-<section id="categorias">
-  <div class="sec-tag reveal">Variedad de marcas</div>
-  <div class="sec-title reveal">Multimarca</div>
-  <div class="cars-grid" id="categoriasGrid"></div>
-</section>
-
-<!-- SELECCIONADOS -->
-<section id="seleccionados">
-  <div class="sec-tag reveal">Elegidos por Besso</div>
-  <div class="sec-title reveal">Seleccionados</div>
-  <div class="cars-grid" id="seleccionadosGrid"></div>
-</section>
+<!-- SECCIONES DINÁMICAS (multimarca, toyota, suv, pickup, 0km, motos, seleccionados) -->
+<!-- Las genera renderSeccionesDin(): cada sección se muestra solo si tiene ≥1 auto -->
+<div id="seccionesDin"></div>
 
 <!-- TODOS LOS AUTOS -->
 <section id="catalogo">
@@ -1145,8 +1132,7 @@ let todosAutos=[],filtroActivo='todos',busqActiva='';
 async function cargarAutos(){
   try{todosAutos=await sbGet('autos');}catch{todosAutos=[];}
   renderPrimerAuto();
-  renderCategorias();
-  renderSeleccionados();
+  renderSeccionesDin();
   renderCatalogo();
 }
 
@@ -1198,18 +1184,51 @@ function renderPrimerAuto(){
   try{initTilt();}catch(e){}
 }
 
-function renderCategorias(){
-  const g=document.getElementById('categoriasGrid');if(!g)return;
-  const lista=todosAutos.filter(a=>esVisibleWeb(a)&&a.seccion==='multimarca');
-  g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
+// Secciones dinámicas: orden fijo, cada una se renderiza SOLO si tiene ≥1 auto.
+const SECCIONES_DIN=[
+  {key:'multimarca',label:'Multimarca',tag:'Variedad de marcas'},
+  {key:'toyota',label:'Toyota',tag:'Línea Toyota'},
+  {key:'suv',label:'SUV',tag:'Más espacio'},
+  {key:'pickup',label:'Pick-Up',tag:'Trabajo y aventura'},
+  {key:'0km',label:'0km',tag:'Nuevos'},
+  {key:'motos',label:'Motos',tag:'Dos ruedas'},
+  {key:'seleccionado',label:'Seleccionados',tag:'Elegidos por Besso'}
+];
+function renderSeccionesDin(){
+  const cont=document.getElementById('seccionesDin');if(!cont)return;
+  const navSecs=[];
+  if(todosAutos.some(a=>esVisibleWeb(a)&&a.seccion==='primer_auto'))
+    navSecs.push({id:'primer-auto',label:'Tu Primer Auto'});
+  let html='';
+  SECCIONES_DIN.forEach(s=>{
+    const lista=todosAutos.filter(a=>esVisibleWeb(a)&&a.seccion===s.key);
+    if(!lista.length)return; // sin autos → no se renderiza la sección ni su título
+    navSecs.push({id:'sec-'+s.key,label:s.label});
+    html+=`<section id="sec-${s.key}">
+      <div class="sec-tag">${s.tag}</div>
+      <div class="sec-title">${s.label}</div>
+      <div class="cars-grid">${lista.map(cardHtml).join('')}</div>
+    </section>`;
+  });
+  cont.innerHTML=html;
+  buildNavSecs(navSecs);
   try{initTilt();}catch(e){}
 }
-
-function renderSeleccionados(){
-  const g=document.getElementById('seleccionadosGrid');if(!g)return;
-  const lista=todosAutos.filter(a=>esVisibleWeb(a)&&a.seccion==='seleccionado');
-  g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
-  try{initTilt();}catch(e){}
+function buildNavSecs(secs){
+  const ul=document.getElementById('navLinks');if(!ul)return;
+  ul.querySelectorAll('.nav-sec-link').forEach(li=>li.remove());
+  const frag=document.createDocumentFragment();
+  secs.forEach(s=>{
+    const li=document.createElement('li');li.className='nav-sec-link';
+    li.innerHTML='<a href="#'+s.id+'">'+s.label+'</a>';
+    li.querySelector('a').addEventListener('click',()=>{
+      ul.classList.remove('open');
+      const ham=document.getElementById('navHam');
+      if(ham){ham.classList.remove('open');ham.setAttribute('aria-expanded','false');}
+    });
+    frag.appendChild(li);
+  });
+  ul.insertBefore(frag,ul.firstChild);
 }
 
 function renderCatalogo(){
