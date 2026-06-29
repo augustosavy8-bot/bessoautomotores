@@ -703,7 +703,7 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
   <a href="https://wa.me/5493471521387?text=Hola%20Besso%20Automotores%2C%20me%20interesa%20el%20espacio%20Tu%20Primer%20Auto" target="_blank" class="pa-cta pa-reveal" style="transition-delay:.36s">QUIERO MI PRIMER AUTO</a>
   <div class="pa-autos-wrap">
     <p class="pa-autos-label">Unidades disponibles</p>
-    <div class="cars-grid" id="primerAutoGrid"></div>
+    <div id="primerAutoGrid"></div>
   </div>
 </section>
 
@@ -727,11 +727,11 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
     </div>
   </div>
   <div class="cat-carrusel">
-    <button class="carr-arrow carr-prev" onclick="carrNav(-1)" aria-label="Ver anteriores">&#8249;</button>
+    <button class="carr-arrow carr-prev" onclick="carrNav(this,-1)" aria-label="Ver anteriores">&#8249;</button>
     <div class="cars-carrusel" id="carsGrid">
       <div class="skel"></div><div class="skel"></div><div class="skel"></div>
     </div>
-    <button class="carr-arrow carr-next" onclick="carrNav(1)" aria-label="Ver siguientes">&#8250;</button>
+    <button class="carr-arrow carr-next" onclick="carrNav(this,1)" aria-label="Ver siguientes">&#8250;</button>
   </div>
 </section>
 
@@ -1180,7 +1180,7 @@ const esVisibleWeb=a=>a.estado!=='vendido';
 function renderPrimerAuto(){
   const g=document.getElementById('primerAutoGrid');if(!g)return;
   const lista=todosAutos.filter(a=>esVisibleWeb(a)&&a.seccion==='primer_auto');
-  g.innerHTML=lista.length?lista.map(cardHtml).join(''):SEC_VACIO;
+  g.innerHTML=lista.length?carruselHtml(lista.map(cardHtml).join('')):SEC_VACIO;
   try{initTilt();}catch(e){}
 }
 
@@ -1207,7 +1207,7 @@ function renderSeccionesDin(){
     html+=`<section id="sec-${s.key}">
       <div class="sec-tag">${s.tag}</div>
       <div class="sec-title">${s.label}</div>
-      <div class="cars-grid">${lista.map(cardHtml).join('')}</div>
+      ${carruselHtml(lista.map(cardHtml).join(''))}
     </section>`;
   });
   cont.innerHTML=html;
@@ -1245,11 +1245,21 @@ function filtrar(btn,tipo){filtroActivo=tipo;document.querySelectorAll('.fb').fo
 function buscar(){busqActiva=document.getElementById('busq').value.trim();renderCatalogo();}
 
 // Flechas del carrusel del catálogo: avanza/retrocede un ancho de card + gap.
-function carrNav(dir){
-  const t=document.getElementById('carsGrid');if(!t)return;
+function carrNav(btn,dir){
+  const wrap=btn.closest('.cat-carrusel');if(!wrap)return;
+  const t=wrap.querySelector('.cars-carrusel');if(!t)return;
   const card=t.querySelector('.car-card');
   const step=card?card.getBoundingClientRect().width+24:t.clientWidth*0.85;
   t.scrollBy({left:dir*step,behavior:'smooth'});
+}
+
+// Envuelve un set de cards en la misma estructura de carrusel del catálogo.
+function carruselHtml(inner){
+  return '<div class="cat-carrusel">'
+    +'<button class="carr-arrow carr-prev" onclick="carrNav(this,-1)" aria-label="Ver anteriores">&#8249;</button>'
+    +'<div class="cars-carrusel">'+inner+'</div>'
+    +'<button class="carr-arrow carr-next" onclick="carrNav(this,1)" aria-label="Ver siguientes">&#8250;</button>'
+    +'</div>';
 }
 
 function galIdx(dot,idx){const g=dot.closest('.car-gal');g.querySelectorAll('.car-gal-img').forEach((img,i)=>img.classList.toggle('active',i===idx));g.querySelectorAll('.gdot').forEach((d,i)=>d.classList.toggle('active',i===idx));}
