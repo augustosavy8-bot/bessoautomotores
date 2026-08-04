@@ -619,7 +619,7 @@ nav.scrolled{height:64px;background:rgba(15,34,54,0.92);backdrop-filter:blur(20p
 <!-- HERO -->
 <section class="hero">
   <div class="hero-bg"></div>
-  <video class="hero-video" id="heroVid" autoplay muted loop playsinline style="visibility:hidden"
+  <video class="hero-video" id="heroVid" autoplay muted loop playsinline preload="none" style="visibility:hidden"
     poster="https://images.pexels.com/videos/854745/free-video-854745.jpg?auto=compress&cs=tinysrgb&w=1280">
     <source src="https://videos.pexels.com/video-files/854745/854745-hd_1280_720_50fps.mp4" type="video/mp4"/>
     <source src="https://videos.pexels.com/video-files/854745/854745-sd_640_360_25fps.mp4" type="video/mp4"/>
@@ -1084,13 +1084,10 @@ if(vid){
 (async function(){
   var _v=document.getElementById('heroVid');
   if(!_v)return;
-  var _revealed=false;
-  var _t=setTimeout(function(){
-    if(!_revealed){_revealed=true;_v.style.visibility='visible';_v.classList.add('loaded');}
-  },4000);
+  var _revealed=false,_t=null;
   function _reveal(){
     if(_revealed)return;
-    _revealed=true;clearTimeout(_t);
+    _revealed=true;if(_t)clearTimeout(_t);
     _v.style.visibility='visible';_v.classList.add('loaded');
   }
   function _loadVideo(url){
@@ -1105,12 +1102,20 @@ if(vid){
     _v.addEventListener('loadeddata',_reveal,{once:true});
     _v.load();_v.play().catch(function(){});
   }
-  try{
-    var _r=await fetch(SB_URL+'/rest/v1/config?clave=eq.hero_video&select=valor',{headers:_SBH});
-    var _url=null;
-    if(_r.ok){var _d=await _r.json();if(_d&&_d.length&&_d[0].valor)_url=_d[0].valor;}
-    _loadVideo(_url);
-  }catch(e){_loadVideo(null);}
+  async function _start(){
+    _t=setTimeout(function(){if(!_revealed)_reveal();},4000);
+    try{
+      var _r=await fetch(SB_URL+'/rest/v1/config?clave=eq.hero_video&select=valor',{headers:_SBH});
+      var _url=null;
+      if(_r.ok){var _d=await _r.json();if(_d&&_d.length&&_d[0].valor)_url=_d[0].valor;}
+      _loadVideo(_url);
+    }catch(e){_loadVideo(null);}
+  }
+  // Priorizamos las fotos del catálogo: el video del hero recién se descarga
+  // cuando la página ya terminó de cargar, para que no compita por el ancho de
+  // banda con las fotos de los autos (que es lo que el usuario vino a ver).
+  if(document.readyState==='complete'){setTimeout(_start,300);}
+  else{window.addEventListener('load',function(){setTimeout(_start,300);},{once:true});}
 })();
 
 // ── CATÁLOGO ──
@@ -1134,6 +1139,16 @@ function imgErr(img){
   if(img.dataset.full && img.src!==img.dataset.full) img.src=img.dataset.full;
 }
 
+// GIF transparente 1x1: placeholder de las fotos que aún no se descargaron.
+const BLANK_IMG='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+// Carga diferida: baja la foto real (data-lazy) recién cuando se necesita mostrar.
+function ensureImg(img){
+  if(img && img.dataset && img.dataset.lazy){
+    img.src=img.dataset.lazy;
+    img.removeAttribute('data-lazy');
+  }
+}
+
 // La primera imagen visible de la página carga eager (LCP); el resto, lazy.
 let lcpReady=false;
 
@@ -1142,10 +1157,18 @@ function cardHtml(a){
   const imgs=fotos.map((f,i)=>{
     const first=(i===0);
     const eager=first&&!lcpReady; if(eager)lcpReady=true;
-    return `<img class="car-gal-img${first?' active':''}" src="${imgSrc(f)}" `+
-           `data-full="${f}" onerror="imgErr(this)" decoding="async" `+
-           (eager?'fetchpriority="high"':'loading="lazy"')+
-           ` alt="${a.marca} ${a.modelo}"/>`;
+    // Solo la 1ª foto de cada card se descarga al cargar la página. Las demás
+    // quedan diferidas (data-lazy) y bajan recién cuando el usuario navega la
+    // galería (galNav/galIdx). Antes se bajaban TODAS de golpe → carga lenta.
+    if(first){
+      return `<img class="car-gal-img active" src="${imgSrc(f)}" `+
+             `data-full="${f}" onerror="imgErr(this)" decoding="async" `+
+             (eager?'fetchpriority="high"':'loading="lazy"')+
+             ` alt="${a.marca} ${a.modelo}"/>`;
+    }
+    return `<img class="car-gal-img" src="${BLANK_IMG}" data-lazy="${imgSrc(f)}" `+
+           `data-full="${f}" onerror="imgErr(this)" decoding="async" loading="lazy" `+
+           `alt="${a.marca} ${a.modelo}"/>`;
   }).join('')||'<div style="width:100%;height:100%;background:var(--g);display:flex;align-items:center;justify-content:center;color:var(--gc);font-size:12px;">Sin foto</div>';
   const dots=fotos.length>1?fotos.map((_,i)=>`<button class="gdot${i===0?' active':''}" onclick="event.stopPropagation();galIdx(this,${i})"></button>`).join(''):'';
   const navs=fotos.length>1?`<button class="gal-prev" onclick="event.stopPropagation();galNav(this,-1)">&#8249;</button><button class="gal-next" onclick="event.stopPropagation();galNav(this,1)">&#8250;</button>`:'';
@@ -1249,8 +1272,8 @@ function carruselHtml(inner){
     +'</div>';
 }
 
-function galIdx(dot,idx){const g=dot.closest('.car-gal');g.querySelectorAll('.car-gal-img').forEach((img,i)=>img.classList.toggle('active',i===idx));g.querySelectorAll('.gdot').forEach((d,i)=>d.classList.toggle('active',i===idx));}
-function galNav(btn,dir){const g=btn.closest('.car-gal');const imgs=g.querySelectorAll('.car-gal-img');let cur=0;imgs.forEach((img,i)=>{if(img.classList.contains('active'))cur=i;});const next=(cur+dir+imgs.length)%imgs.length;imgs.forEach((img,i)=>img.classList.toggle('active',i===next));g.querySelectorAll('.gdot').forEach((d,i)=>d.classList.toggle('active',i===next));}
+function galIdx(dot,idx){const g=dot.closest('.car-gal');const imgs=g.querySelectorAll('.car-gal-img');ensureImg(imgs[idx]);imgs.forEach((img,i)=>img.classList.toggle('active',i===idx));g.querySelectorAll('.gdot').forEach((d,i)=>d.classList.toggle('active',i===idx));}
+function galNav(btn,dir){const g=btn.closest('.car-gal');const imgs=g.querySelectorAll('.car-gal-img');let cur=0;imgs.forEach((img,i)=>{if(img.classList.contains('active'))cur=i;});const next=(cur+dir+imgs.length)%imgs.length;ensureImg(imgs[next]);imgs.forEach((img,i)=>img.classList.toggle('active',i===next));g.querySelectorAll('.gdot').forEach((d,i)=>d.classList.toggle('active',i===next));}
 
 // ── MODAL ──
 let mFotos=[],mFotoCur=0,mAutoSel=null;
@@ -1261,7 +1284,7 @@ function abrirModal(id){
   const gal=document.getElementById('modalGal');
   gal.innerHTML='';
   if(mFotos.length){
-    mFotos.forEach((f,i)=>{const img=document.createElement('img');img.src=imgSrc(f);img.loading='lazy';img.decoding='async';img.dataset.full=f;img.onerror=()=>imgErr(img);img.className='modal-gal-img'+(i===0?' active':'');gal.appendChild(img);});
+    mFotos.forEach((f,i)=>{const img=document.createElement('img');if(i===0){img.src=imgSrc(f);}else{img.src=BLANK_IMG;img.dataset.lazy=imgSrc(f);}img.loading='lazy';img.decoding='async';img.dataset.full=f;img.onerror=()=>imgErr(img);img.className='modal-gal-img'+(i===0?' active':'');gal.appendChild(img);});
     if(mFotos.length>1){
       gal.innerHTML+=`<button class="modal-prev" onclick="mNav(-1)">&#8249;</button><button class="modal-next" onclick="mNav(1)">&#8250;</button><div class="modal-mdots">${mFotos.map((_,i)=>`<button class="mdot${i===0?' active':''}" onclick="mIr(${i})"></button>`).join('')}</div><div class="modal-cnt" id="mCnt">1 / ${mFotos.length}</div>`;
     }
@@ -1282,7 +1305,9 @@ function abrirModal(id){
 function mNav(dir){mFotoCur=(mFotoCur+dir+mFotos.length)%mFotos.length;mActGal();}
 function mIr(idx){mFotoCur=idx;mActGal();}
 function mActGal(){
-  document.querySelectorAll('.modal-gal-img').forEach((img,i)=>img.classList.toggle('active',i===mFotoCur));
+  const _mimgs=document.querySelectorAll('.modal-gal-img');
+  ensureImg(_mimgs[mFotoCur]);
+  _mimgs.forEach((img,i)=>img.classList.toggle('active',i===mFotoCur));
   document.querySelectorAll('.mdot').forEach((d,i)=>d.classList.toggle('active',i===mFotoCur));
   const cnt=document.getElementById('mCnt');if(cnt)cnt.textContent=(mFotoCur+1)+' / '+mFotos.length;
 }
