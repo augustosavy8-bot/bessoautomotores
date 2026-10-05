@@ -1128,11 +1128,18 @@ async function cargarAutos(){
   renderCatalogo();
 }
 
-function imgSrc(url){
-  // Se sirve la imagen directa del Storage (object/public), sin render/image.
-  // La compresión real ya se hace al subir desde el CRM (canvas), así que no
-  // hace falta la transformación de Supabase (que además consume cuota).
-  return url||'';
+function imgSrc(url, w, q){
+  // Pedimos la foto REDIMENSIONADA a Supabase (render/image) en vez de la full.
+  // Una card muestra la foto a ~300px pero la original pesa 150-250KB (1200px):
+  // servirla a 600px/q60 la baja a ~40-60KB. La versión transformada queda
+  // cacheada en el CDN. Si el transform fallara (cuota/plan), imgErr vuelve a
+  // la original (data-full), así que nunca se rompe.
+  if(!url) return '';
+  var marca='/storage/v1/object/public/';
+  var i=url.indexOf(marca);
+  if(i===-1) return url;
+  return url.slice(0,i)+'/storage/v1/render/image/public/'+url.slice(i+marca.length)
+    +'?width='+(w||600)+'&quality='+(q||60);
 }
 // Fallback si la transformación no está habilitada en el plan: vuelve a la original.
 function imgErr(img){
@@ -1284,7 +1291,7 @@ function abrirModal(id){
   const gal=document.getElementById('modalGal');
   gal.innerHTML='';
   if(mFotos.length){
-    mFotos.forEach((f,i)=>{const img=document.createElement('img');if(i===0){img.src=imgSrc(f);}else{img.src=BLANK_IMG;img.dataset.lazy=imgSrc(f);}img.loading='lazy';img.decoding='async';img.dataset.full=f;img.onerror=()=>imgErr(img);img.className='modal-gal-img'+(i===0?' active':'');gal.appendChild(img);});
+    mFotos.forEach((f,i)=>{const img=document.createElement('img');if(i===0){img.src=imgSrc(f,1280,72);}else{img.src=BLANK_IMG;img.dataset.lazy=imgSrc(f,1280,72);}img.loading='lazy';img.decoding='async';img.dataset.full=f;img.onerror=()=>imgErr(img);img.className='modal-gal-img'+(i===0?' active':'');gal.appendChild(img);});
     if(mFotos.length>1){
       gal.innerHTML+=`<button class="modal-prev" onclick="mNav(-1)">&#8249;</button><button class="modal-next" onclick="mNav(1)">&#8250;</button><div class="modal-mdots">${mFotos.map((_,i)=>`<button class="mdot${i===0?' active':''}" onclick="mIr(${i})"></button>`).join('')}</div><div class="modal-cnt" id="mCnt">1 / ${mFotos.length}</div>`;
     }
